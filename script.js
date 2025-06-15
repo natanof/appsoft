@@ -176,3 +176,22 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarUsuarios();
     mostrarUsuarios(usuarios, currentPage);
   });
+
+(function cadastrarUsuariosFake() {
+  const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
+  
+  for (let i = 1; i <= 50; i++) {
+    const novoUsuario = {
+      id: Date.now() + i,
+      nome: `Usuário ${i}`,
+      email: `usuario${i}@teste.com`,
+      telefone: `(11) 90000-00${i.toString().padStart(2, "0")}`,
+      foto: `https://i.pravatar.cc/150?img=${(i % 70) + 1}` // Usa até 70 imagens diferentes
+    };
+    usuarios.unshift(novoUsuario);
+  }
+
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+  alert("✅ 50 usuários cadastrados!");
+  location.reload(); // Recarrega a página para exibir os novos usuários
+})();
