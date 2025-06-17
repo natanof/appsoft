@@ -5,50 +5,52 @@
   box-sizing: border-box;
 }
 
-/* Variáveis CSS */
+/* Variáveis CSS - Estilo iOS */
 :root {
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: rgba(37, 99, 235, 0.1);
-  --secondary-color: #64748b;
-  --success-color: #10b981;
-  --danger-color: #ef4444;
-  --warning-color: #f59e0b;
-  --background-color: #f8fafc;
-  --surface-color: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  --primary-color: #007AFF;
+  --primary-hover: #0056CC;
+  --primary-light: rgba(0, 122, 255, 0.1);
+  --secondary-color: #8E8E93;
+  --success-color: #34C759;
+  --danger-color: #FF3B30;
+  --warning-color: #FF9500;
+  --background-color: #F2F2F7;
+  --surface-color: #FFFFFF;
+  --text-primary: #000000;
+  --text-secondary: #8E8E93;
+  --border-color: #C6C6C8;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
 }
 
-/* Fonte Work Sans */
+/* Fonte San Francisco (iOS) */
 body {
-  font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background: var(--background-color);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
   padding: var(--spacing-lg);
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Cabeçalho com animação */
+/* Cabeçalho estilo iOS */
 header {
   text-align: center;
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-xl) 0;
-  animation: fadeInDown 0.8s ease-out;
+  animation: iosSlideDown 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 header h1 {
@@ -63,30 +65,17 @@ header h1 {
   position: relative;
 }
 
-header h1::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-  border-radius: 2px;
-  animation: expandWidth 1s ease-out 0.5s both;
-}
-
 header h1 iconify-icon {
   font-size: 2rem;
   color: var(--primary-color);
-  animation: bounce 2s infinite;
+  animation: iosFloat 3s ease-in-out infinite;
 }
 
 .subtitle {
   font-size: 1.125rem;
   color: var(--text-secondary);
   font-weight: 400;
-  animation: fadeInUp 0.8s ease-out 0.3s both;
+  animation: iosFadeIn 0.8s ease-out 0.3s both;
 }
 
 .container {
@@ -94,7 +83,7 @@ header h1 iconify-icon {
   margin: 0 auto;
 }
 
-/* Estatísticas com animações */
+/* Estatísticas estilo iOS */
 .stats-section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -110,22 +99,13 @@ header h1 iconify-icon {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 0.5px solid var(--border-color);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
-  animation: slideInUp 0.6s ease-out;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.5s;
+  animation: iosSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .stat-card:hover {
@@ -134,8 +114,9 @@ header h1 iconify-icon {
   border-color: var(--primary-color);
 }
 
-.stat-card:hover::before {
-  left: 100%;
+.stat-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .stat-card:nth-child(1) { animation-delay: 0.1s; }
@@ -148,11 +129,11 @@ header h1 iconify-icon {
   background: var(--primary-light);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .stat-card:hover iconify-icon {
-  transform: rotate(10deg) scale(1.1);
+  transform: scale(1.1);
   background: var(--primary-color);
   color: white;
 }
@@ -162,7 +143,7 @@ header h1 iconify-icon {
   font-size: 1.875rem;
   font-weight: 700;
   color: var(--text-primary);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .stat-card:hover .stat-number {
@@ -177,28 +158,17 @@ header h1 iconify-icon {
   font-weight: 500;
 }
 
-/* Formulário de Cadastro com animações */
+/* Formulário estilo iOS */
 .form-section {
   background: var(--surface-color);
   padding: var(--spacing-xl);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--spacing-xl);
-  border: 1px solid var(--border-color);
-  animation: slideInLeft 0.8s ease-out;
-  position: relative;
-  overflow: hidden;
-}
-
-.form-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 0.5px solid var(--border-color);
+  animation: iosSlideLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .form-section h2 {
@@ -213,7 +183,7 @@ header h1 iconify-icon {
 
 .form-section h2 iconify-icon {
   color: var(--primary-color);
-  animation: pulse 2s infinite;
+  animation: iosPulse 2s infinite;
 }
 
 #userForm {
@@ -222,7 +192,7 @@ header h1 iconify-icon {
   gap: var(--spacing-lg);
 }
 
-/* Grupos de formulário personalizados */
+/* Grupos de formulário iOS */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -231,41 +201,24 @@ header h1 iconify-icon {
 
 .form-group label {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.form-group label::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.form-group:focus-within label::before {
-  opacity: 1;
-  transform: scale(1.5);
-}
-
-/* Inputs personalizados */
+/* Inputs estilo iOS */
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px solid var(--border-color);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   background: var(--surface-color);
-  position: relative;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-group input:focus,
@@ -273,31 +226,26 @@ header h1 iconify-icon {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 4px var(--primary-light);
-  transform: translateY(-2px);
+  transform: scale(1.02);
 }
 
 .form-group input:hover,
 .form-group select:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Select personalizado */
+/* Select personalizado iOS */
 .form-group select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007AFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
   background-repeat: no-repeat;
   background-size: 1.5em 1.5em;
   padding-right: 2.5rem;
   cursor: pointer;
 }
 
-.form-group select:focus {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%232563eb' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-}
-
-/* Mensagens de erro com animação */
+/* Mensagens de erro iOS */
 .error-message {
   font-size: 0.75rem;
   color: var(--danger-color);
@@ -305,16 +253,17 @@ header h1 iconify-icon {
   min-height: 1rem;
   opacity: 0;
   transform: translateY(-10px);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-weight: 500;
 }
 
 .error-message:not(:empty) {
   opacity: 1;
   transform: translateY(0);
-  animation: shake 0.5s ease-in-out;
+  animation: iosShake 0.5s ease-in-out;
 }
 
-/* File Input personalizado */
+/* File Input iOS */
 .file-input-wrapper {
   position: relative;
 }
@@ -332,26 +281,15 @@ header h1 iconify-icon {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   border: 2px dashed var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--background-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   min-height: 120px;
   position: relative;
   overflow: hidden;
-}
-
-.file-preview::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
-  transition: left 0.5s;
 }
 
 .file-preview:hover {
@@ -360,31 +298,32 @@ header h1 iconify-icon {
   transform: scale(1.02);
 }
 
-.file-preview:hover::before {
-  left: 100%;
+.file-preview:active {
+  transform: scale(0.98);
 }
 
 .file-preview iconify-icon {
   font-size: 2.5rem;
   color: var(--text-secondary);
   margin-bottom: var(--spacing-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .file-preview:hover iconify-icon {
   color: var(--primary-color);
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.1);
 }
 
 .file-preview span {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  transition: all 0.3s ease;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .file-preview:hover span {
   color: var(--primary-color);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .file-preview.has-image {
@@ -397,15 +336,15 @@ header h1 iconify-icon {
   width: 100%;
   height: 120px;
   object-fit: cover;
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .file-preview.has-image:hover img {
   transform: scale(1.05);
 }
 
-/* Form Actions com animações */
+/* Form Actions iOS */
 .form-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -414,66 +353,48 @@ header h1 iconify-icon {
   margin-top: var(--spacing-md);
 }
 
-/* Botões personalizados */
+/* Botões estilo iOS */
 .btn-primary,
 .btn-secondary,
 .btn-danger,
 .btn-export {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   border: none;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   text-decoration: none;
   position: relative;
   overflow: hidden;
-}
-
-.btn-primary::before,
-.btn-secondary::before,
-.btn-danger::before,
-.btn-export::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-primary:hover::before,
-.btn-secondary:hover::before,
-.btn-danger:hover::before,
-.btn-export:hover::before {
-  left: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
 }
 
 .btn-primary:hover {
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 .btn-secondary {
   background-color: var(--surface-color);
   color: var(--text-secondary);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
@@ -483,37 +404,53 @@ header h1 iconify-icon {
   transform: translateY(-2px);
 }
 
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger-color), #dc2626);
+  background: var(--danger-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
 }
 
 .btn-danger:hover {
+  background: #D70015;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 25px rgba(255, 59, 48, 0.4);
+}
+
+.btn-danger:active {
+  transform: scale(0.95);
 }
 
 .btn-export {
-  background: linear-gradient(135deg, var(--success-color), #059669);
+  background: var(--success-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);
 }
 
 .btn-export:hover {
+  background: #248A3D;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 25px rgba(52, 199, 89, 0.4);
 }
 
-/* Controles de Busca e Filtros */
+.btn-export:active {
+  transform: scale(0.95);
+}
+
+/* Controles de Busca iOS */
 .controls-section {
   background: var(--surface-color);
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--spacing-xl);
-  border: 1px solid var(--border-color);
-  animation: slideInRight 0.8s ease-out;
+  border: 0.5px solid var(--border-color);
+  animation: iosSlideRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .search-bar {
@@ -532,7 +469,7 @@ header h1 iconify-icon {
   color: var(--text-secondary);
   font-size: 1.25rem;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .search-input-wrapper:focus-within iconify-icon {
@@ -542,19 +479,19 @@ header h1 iconify-icon {
 
 .search-input-wrapper input {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 2.5rem;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 2.5rem;
   font-size: 1rem;
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .search-input-wrapper input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 4px var(--primary-light);
-  transform: translateY(-2px);
+  transform: scale(1.02);
 }
 
 .clear-btn {
@@ -568,13 +505,18 @@ header h1 iconify-icon {
   border-radius: var(--radius-sm);
   opacity: 0;
   transform: scale(0.8);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .clear-btn:hover {
   background: var(--background-color);
   color: var(--danger-color);
   transform: scale(1);
+}
+
+.clear-btn:active {
+  transform: scale(0.9);
 }
 
 .clear-btn.show {
@@ -590,25 +532,26 @@ header h1 iconify-icon {
 }
 
 .filters select {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px solid var(--border-color);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-color);
   font-size: 0.875rem;
   min-width: 150px;
+  -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007AFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
   background-repeat: no-repeat;
   background-size: 1.5em 1.5em;
   padding-right: 2.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .filters select:hover {
   border-color: var(--primary-color);
-  transform: translateY(-1px);
+  transform: scale(1.02);
 }
 
 .filters select:focus {
@@ -617,14 +560,20 @@ header h1 iconify-icon {
   box-shadow: 0 0 0 4px var(--primary-light);
 }
 
-/* Seção de Usuários */
+.filters select:active {
+  transform: scale(0.98);
+}
+
+/* Seção de Usuários iOS */
 .users-section {
   background: var(--surface-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 0.5px solid var(--border-color);
   overflow: hidden;
-  animation: fadeInUp 0.8s ease-out;
+  animation: iosFadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .section-header {
@@ -632,8 +581,8 @@ header h1 iconify-icon {
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, var(--surface-color), var(--background-color));
+  border-bottom: 0.5px solid var(--border-color);
+  background: var(--surface-color);
 }
 
 .section-header h2 {
@@ -647,15 +596,15 @@ header h1 iconify-icon {
 
 .section-header h2 iconify-icon {
   color: var(--primary-color);
-  animation: pulse 2s infinite;
+  animation: iosPulse 2s infinite;
 }
 
 .view-toggle {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: 0;
   background: var(--background-color);
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-md);
+  padding: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .view-btn {
@@ -665,22 +614,26 @@ header h1 iconify-icon {
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--text-secondary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .view-btn:hover {
   color: var(--primary-color);
-  transform: scale(1.05);
+}
+
+.view-btn:active {
+  transform: scale(0.95);
 }
 
 .view-btn.active {
-  background: var(--primary-color);
-  color: white;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  background: var(--surface-color);
+  color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Grid de usuários com animações */
+/* Grid de usuários iOS */
 .usuarios-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -700,33 +653,23 @@ header h1 iconify-icon {
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 0.5px solid var(--border-color);
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInUp 0.6s ease-out;
-}
-
-.usuario-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.usuario-card:hover::before {
-  transform: scaleX(1);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: iosSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .usuario-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   border-color: var(--primary-color);
+}
+
+.usuario-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .usuario-card.list-view {
@@ -738,7 +681,7 @@ header h1 iconify-icon {
 
 .usuario-card.list-view:hover {
   transform: translateX(8px) scale(1.01);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .usuario-card img {
@@ -746,14 +689,14 @@ header h1 iconify-icon {
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--border-color);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid var(--border-color);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-card:hover img {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.1);
   border-color: var(--primary-color);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
 }
 
 .usuario-card.list-view img {
@@ -772,7 +715,7 @@ header h1 iconify-icon {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-primary);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-card:hover .usuario-info h3 {
@@ -791,11 +734,11 @@ header h1 iconify-icon {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-info p iconify-icon {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-card:hover .usuario-info p iconify-icon {
@@ -810,9 +753,9 @@ header h1 iconify-icon {
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   margin-top: var(--spacing-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-card:hover .usuario-info .cargo {
@@ -827,7 +770,7 @@ header h1 iconify-icon {
   margin-top: var(--spacing-md);
   opacity: 0;
   transform: translateY(10px);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .usuario-card:hover .usuario-actions {
@@ -848,62 +791,56 @@ header h1 iconify-icon {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
   position: relative;
   overflow: hidden;
-}
-
-.action-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.action-btn:hover::before {
-  left: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .edit-btn {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(52, 199, 89, 0.1);
   color: var(--success-color);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(52, 199, 89, 0.2);
 }
 
 .edit-btn:hover {
   background: var(--success-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.edit-btn:active {
+  transform: scale(0.95);
 }
 
 .remove-btn {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(255, 59, 48, 0.1);
   color: var(--danger-color);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(255, 59, 48, 0.2);
 }
 
 .remove-btn:hover {
   background: var(--danger-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
 }
 
-/* Estado Vazio */
+.remove-btn:active {
+  transform: scale(0.95);
+}
+
+/* Estado Vazio iOS */
 .empty-state {
   text-align: center;
   padding: var(--spacing-xl) var(--spacing-lg);
   color: var(--text-secondary);
-  animation: fadeIn 0.8s ease-out;
+  animation: iosFadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .empty-state iconify-icon {
@@ -911,7 +848,7 @@ header h1 iconify-icon {
   color: var(--text-secondary);
   opacity: 0.5;
   margin-bottom: var(--spacing-md);
-  animation: float 3s ease-in-out infinite;
+  animation: iosFloat 3s ease-in-out infinite;
 }
 
 .empty-state h3 {
@@ -921,7 +858,7 @@ header h1 iconify-icon {
   color: var(--text-primary);
 }
 
-/* Paginação personalizada */
+/* Paginação iOS */
 .pagination {
   display: flex;
   justify-content: center;
@@ -933,40 +870,28 @@ header h1 iconify-icon {
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
-  animation: slideInUp 0.8s ease-out;
+  border: 0.5px solid var(--border-color);
+  animation: iosSlideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .pagination button {
   padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--surface-color);
   color: var(--text-secondary);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   min-width: 40px;
   height: 40px;
   position: relative;
   overflow: hidden;
-}
-
-.pagination button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.pagination button:hover:not([disabled])::before {
-  left: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .pagination button:hover:not([disabled]) {
@@ -974,7 +899,11 @@ header h1 iconify-icon {
   color: white;
   border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.pagination button:active:not([disabled]) {
+  transform: scale(0.95);
 }
 
 .pagination button[disabled] {
@@ -990,10 +919,10 @@ header h1 iconify-icon {
 }
 
 .page-numbers button.active {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
 }
 
 .page-info {
@@ -1007,29 +936,35 @@ header h1 iconify-icon {
   font-size: 0.875rem;
   color: var(--text-secondary);
   white-space: nowrap;
+  font-weight: 500;
 }
 
 #itemsPerPageSelect {
   padding: var(--spacing-xs) var(--spacing-sm);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--surface-color);
   font-size: 0.75rem;
+  -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007AFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.25rem center;
   background-repeat: no-repeat;
   background-size: 1em 1em;
   padding-right: 1.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 #itemsPerPageSelect:hover {
   border-color: var(--primary-color);
 }
 
-/* Modal personalizado */
+#itemsPerPageSelect:active {
+  transform: scale(0.98);
+}
+
+/* Modal iOS */
 .modal {
   display: none;
   position: fixed;
@@ -1038,15 +973,16 @@ header h1 iconify-icon {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .modal.show {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.3s ease;
+  animation: iosFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .modal-content {
@@ -1057,8 +993,8 @@ header h1 iconify-icon {
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border-color);
+  animation: iosModalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 0.5px solid var(--border-color);
 }
 
 .modal-header {
@@ -1066,8 +1002,8 @@ header h1 iconify-icon {
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, var(--surface-color), var(--background-color));
+  border-bottom: 0.5px solid var(--border-color);
+  background: var(--surface-color);
 }
 
 .modal-header h3 {
@@ -1084,13 +1020,18 @@ header h1 iconify-icon {
   color: var(--text-secondary);
   padding: var(--spacing-xs);
   border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .modal-close:hover {
   background: var(--background-color);
   color: var(--danger-color);
   transform: scale(1.1);
+}
+
+.modal-close:active {
+  transform: scale(0.9);
 }
 
 .modal-body {
@@ -1102,11 +1043,11 @@ header h1 iconify-icon {
   justify-content: flex-end;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
-  border-top: 1px solid var(--border-color);
+  border-top: 0.5px solid var(--border-color);
   background: var(--background-color);
 }
 
-/* Toast Notifications personalizadas */
+/* Toast Notifications iOS */
 .toast-container {
   position: fixed;
   top: var(--spacing-lg);
@@ -1127,24 +1068,11 @@ header h1 iconify-icon {
   align-items: center;
   gap: var(--spacing-sm);
   min-width: 300px;
-  animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: iosToastSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
-}
-
-.toast::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.toast:hover::before {
-  left: 100%;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .toast.success {
@@ -1161,7 +1089,7 @@ header h1 iconify-icon {
 
 .toast iconify-icon {
   font-size: 1.25rem;
-  animation: pulse 2s infinite;
+  animation: iosPulse 2s infinite;
 }
 
 .toast.success iconify-icon {
@@ -1199,7 +1127,8 @@ header h1 iconify-icon {
   cursor: pointer;
   padding: var(--spacing-xs);
   border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .toast-close:hover {
@@ -1208,13 +1137,17 @@ header h1 iconify-icon {
   transform: scale(1.1);
 }
 
-/* Animações personalizadas */
-@keyframes fadeIn {
+.toast-close:active {
+  transform: scale(0.9);
+}
+
+/* Animações iOS */
+@keyframes iosFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes fadeInDown {
+@keyframes iosSlideDown {
   from {
     opacity: 0;
     transform: translateY(-30px);
@@ -1225,7 +1158,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes fadeInUp {
+@keyframes iosFadeInUp {
   from {
     opacity: 0;
     transform: translateY(30px);
@@ -1236,7 +1169,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes slideInUp {
+@keyframes iosSlideUp {
   from {
     opacity: 0;
     transform: translateY(50px);
@@ -1247,7 +1180,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes slideInLeft {
+@keyframes iosSlideLeft {
   from {
     opacity: 0;
     transform: translateX(-50px);
@@ -1258,7 +1191,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes slideInRight {
+@keyframes iosSlideRight {
   from {
     opacity: 0;
     transform: translateX(50px);
@@ -1269,7 +1202,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes modalSlideIn {
+@keyframes iosModalSlideIn {
   from {
     opacity: 0;
     transform: translateY(-50px) scale(0.9);
@@ -1280,7 +1213,7 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes toastSlideIn {
+@keyframes iosToastSlideIn {
   from {
     opacity: 0;
     transform: translateX(100%) scale(0.8);
@@ -1291,19 +1224,16 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+@keyframes iosFloat {
+  0%, 100% {
     transform: translateY(0);
   }
-  40% {
+  50% {
     transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
   }
 }
 
-@keyframes pulse {
+@keyframes iosPulse {
   0% {
     transform: scale(1);
   }
@@ -1315,63 +1245,28 @@ header h1 iconify-icon {
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes shake {
+@keyframes iosShake {
   0%, 100% {
     transform: translateX(0);
   }
   10%, 30%, 50%, 70%, 90% {
-    transform: translateX(-5px);
+    transform: translateX(-3px);
   }
   20%, 40%, 60%, 80% {
-    transform: translateX(5px);
+    transform: translateX(3px);
   }
 }
 
-@keyframes expandWidth {
-  from {
-    width: 0;
-  }
-  to {
-    width: 60px;
-  }
+/* Estados de validação iOS */
+.form-group input:valid {
+  border-color: var(--success-color);
 }
 
-/* Loading states */
-.loading {
-  position: relative;
-  overflow: hidden;
+.form-group input:invalid:not(:placeholder-shown) {
+  border-color: var(--danger-color);
 }
 
-.loading::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
-/* Responsividade */
+/* Responsividade iOS */
 @media (max-width: 768px) {
   body {
     padding: var(--spacing-md);
@@ -1478,40 +1373,34 @@ header h1 iconify-icon {
   }
 }
 
-/* Micro-interações adicionais */
-.form-group input:valid {
-  border-color: var(--success-color);
-}
-
-.form-group input:invalid:not(:placeholder-shown) {
-  border-color: var(--danger-color);
-}
-
-/* Efeito de digitação para o título */
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
+/* Otimizações para iOS/Safari */
+@supports (-webkit-touch-callout: none) {
+  .usuario-card,
+  .stat-card,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-export,
+  .action-btn {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
 
-/* Hover states aprimorados */
-.stat-card:hover .stat-number {
-  animation: pulse 0.6s ease-in-out;
+/* Smooth scrolling para iOS */
+html {
+  -webkit-overflow-scrolling: touch;
 }
 
-.usuario-card:hover .usuario-info h3 {
-  animation: pulse 0.6s ease-in-out;
-}
-
-/* Estados de foco aprimorados */
-.form-group:focus-within {
-  transform: scale(1.01);
-}
-
-/* Transições suaves para mudanças de estado */
-* {
-  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+/* Prevenção de zoom em inputs no iOS */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }

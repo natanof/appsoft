@@ -53,6 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFiltersAndSort();
         mostrarUsuarios();
         updatePagination();
+        
+        // Adicionar animações de entrada com delay
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 100);
     }
     
     function setupEventListeners() {
@@ -88,6 +93,49 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Validação em tempo real
         setupRealTimeValidation();
+        
+        // Eventos de toque para iOS
+        setupTouchEvents();
+    }
+    
+    function setupTouchEvents() {
+        // Adicionar feedback tátil para botões em dispositivos iOS
+        const buttons = document.querySelectorAll('button, .btn-primary, .btn-secondary, .btn-danger, .btn-export');
+        
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+        });
+        
+        // Adicionar suporte a swipe para cards de usuário
+        let startX, startY, currentX, currentY;
+        
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
+            
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+            
+            const diffX = startX - currentX;
+            const diffY = startY - currentY;
+            
+            // Prevenir scroll horizontal desnecessário
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                e.preventDefault();
+            }
+        });
     }
     
     function setupModalEvents() {
@@ -109,6 +157,14 @@ document.addEventListener("DOMContentLoaded", () => {
         editModal.addEventListener("click", (e) => {
             if (e.target === editModal) closeEditModal();
         });
+        
+        // Suporte a ESC para fechar modais
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeConfirmModal();
+                closeEditModal();
+            }
+        });
     }
     
     function setupRealTimeValidation() {
@@ -126,6 +182,15 @@ document.addEventListener("DOMContentLoaded", () => {
             input.addEventListener('blur', () => {
                 const error = validator(input.value.trim());
                 showFieldError(errorEl, error);
+                
+                // Adicionar feedback visual iOS
+                if (error) {
+                    input.style.borderColor = 'var(--danger-color)';
+                    input.style.boxShadow = '0 0 0 4px rgba(255, 59, 48, 0.1)';
+                } else if (input.value.trim()) {
+                    input.style.borderColor = 'var(--success-color)';
+                    input.style.boxShadow = '0 0 0 4px rgba(52, 199, 89, 0.1)';
+                }
             });
             
             input.addEventListener('input', () => {
@@ -134,13 +199,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     showFieldError(errorEl, error);
                 }
             });
+            
+            input.addEventListener('focus', () => {
+                input.style.borderColor = 'var(--primary-color)';
+                input.style.boxShadow = '0 0 0 4px var(--primary-light)';
+            });
         });
     }
     
     function showFieldError(errorEl, error) {
         errorEl.textContent = error || '';
-        errorEl.parentElement.querySelector('input, select').style.borderColor = 
-            error ? 'var(--danger-color)' : '';
+        
+        if (error) {
+            errorEl.style.opacity = '1';
+            errorEl.style.transform = 'translateY(0)';
+        } else {
+            errorEl.style.opacity = '0';
+            errorEl.style.transform = 'translateY(-10px)';
+        }
     }
     
     // Validadores
@@ -230,9 +306,30 @@ document.addEventListener("DOMContentLoaded", () => {
             new Date(u.dataCadastro).toDateString() === today
         ).length;
         
-        totalUsersEl.textContent = usuarios.length;
-        newUsersTodayEl.textContent = newToday;
-        filteredUsersEl.textContent = filteredUsuarios.length;
+        // Animação de contagem para os números
+        animateNumber(totalUsersEl, usuarios.length);
+        animateNumber(newUsersTodayEl, newToday);
+        animateNumber(filteredUsersEl, filteredUsuarios.length);
+    }
+    
+    function animateNumber(element, targetValue) {
+        const currentValue = parseInt(element.textContent) || 0;
+        const increment = targetValue > currentValue ? 1 : -1;
+        const duration = 500;
+        const steps = Math.abs(targetValue - currentValue);
+        const stepDuration = duration / steps;
+        
+        if (steps === 0) return;
+        
+        let current = currentValue;
+        const timer = setInterval(() => {
+            current += increment;
+            element.textContent = current;
+            
+            if (current === targetValue) {
+                clearInterval(timer);
+            }
+        }, stepDuration);
     }
     
     function applyFiltersAndSort() {
@@ -294,9 +391,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const paginatedUsers = filteredUsuarios.slice(startIndex, startIndex + itemsPerPage);
         
-        paginatedUsers.forEach(usuario => {
+        paginatedUsers.forEach((usuario, index) => {
             const div = document.createElement("div");
             div.className = `usuario-card ${currentView === 'list' ? 'list-view' : ''}`;
+            div.style.animationDelay = `${index * 0.1}s`;
             
             const dataFormatada = new Date(usuario.dataCadastro).toLocaleDateString('pt-BR');
             
@@ -446,6 +544,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
+        // Mostrar loading
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<iconify-icon icon="mdi:loading" class="animate-spin"></iconify-icon> Salvando...';
+        submitBtn.disabled = true;
+        
         // Processar foto
         if (formData.foto) {
             const reader = new FileReader();
@@ -454,6 +558,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     ...formData,
                     foto: event.target.result
                 });
+                
+                // Restaurar botão
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            };
+            reader.onerror = function() {
+                showToast('Erro', 'Erro ao processar a imagem. Tente novamente.', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             };
             reader.readAsDataURL(formData.foto);
         } else {
@@ -461,6 +574,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ...formData,
                 foto: "https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop"
             });
+            
+            // Restaurar botão
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     }
     
@@ -497,17 +614,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // Limpar erros
         document.querySelectorAll('.error-message').forEach(el => {
             el.textContent = '';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-10px)';
         });
         
         // Resetar estilos dos campos
         document.querySelectorAll('input, select').forEach(el => {
             el.style.borderColor = '';
+            el.style.boxShadow = '';
         });
     }
     
     function handleFilePreview(e) {
         const file = e.target.files[0];
         if (file) {
+            // Validações de arquivo
             if (file.size > 5 * 1024 * 1024) { // 5MB
                 showToast('Erro', 'Arquivo muito grande. Máximo 5MB.', 'error');
                 e.target.value = '';
@@ -520,11 +641,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             
+            // Mostrar loading
+            filePreview.innerHTML = `
+                <iconify-icon icon="mdi:loading" class="animate-spin"></iconify-icon>
+                <span>Carregando imagem...</span>
+            `;
+            
             const reader = new FileReader();
             reader.onload = function(event) {
                 filePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
                 filePreview.classList.add('has-image');
+                
+                // Adicionar animação de sucesso
+                filePreview.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    filePreview.style.transform = '';
+                }, 200);
             };
+            
+            reader.onerror = function() {
+                showToast('Erro', 'Erro ao carregar a imagem. Tente novamente.', 'error');
+                filePreview.innerHTML = `
+                    <iconify-icon icon="mdi:camera-plus"></iconify-icon>
+                    <span>Clique para adicionar foto</span>
+                `;
+                filePreview.classList.remove('has-image');
+                e.target.value = '';
+            };
+            
             reader.readAsDataURL(file);
         }
     }
@@ -546,6 +690,9 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFiltersAndSort();
         mostrarUsuarios();
         updatePagination();
+        
+        // Foco no input após limpar
+        searchInput.focus();
     }
     
     function handleFilter(e) {
@@ -568,6 +715,9 @@ document.addEventListener("DOMContentLoaded", () => {
         gridViewBtn.classList.toggle('active', view === 'grid');
         listViewBtn.classList.toggle('active', view === 'list');
         mostrarUsuarios();
+        
+        // Salvar preferência
+        localStorage.setItem('viewPreference', view);
     }
     
     function handleItemsPerPageChange(e) {
@@ -575,6 +725,9 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPage = 1;
         mostrarUsuarios();
         updatePagination();
+        
+        // Salvar preferência
+        localStorage.setItem('itemsPerPagePreference', itemsPerPage);
     }
     
     function confirmRemoveUser(userId) {
@@ -627,6 +780,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('editCargo').value = usuario.cargo;
         
         editModal.classList.add('show');
+        
+        // Foco no primeiro campo
+        setTimeout(() => {
+            document.getElementById('editNome').focus();
+        }, 300);
     }
     
     function handleEditSave() {
@@ -651,6 +809,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
+        // Mostrar loading
+        const saveBtn = document.getElementById('editModalSave');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<iconify-icon icon="mdi:loading" class="animate-spin"></iconify-icon> Salvando...';
+        saveBtn.disabled = true;
+        
         // Atualizar usuário
         const userIndex = usuarios.findIndex(u => u.id === userId);
         if (userIndex !== -1) {
@@ -667,6 +831,10 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Sucesso', 'Usuário atualizado com sucesso!', 'success');
             closeEditModal();
         }
+        
+        // Restaurar botão
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
     }
     
     function closeEditModal() {
@@ -679,30 +847,44 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        const csvContent = [
-            ['Nome', 'Email', 'Telefone', 'Cargo', 'Data de Cadastro'],
-            ...filteredUsuarios.map(u => [
-                u.nome,
-                u.email,
-                u.telefone,
-                u.cargo,
-                new Date(u.dataCadastro).toLocaleDateString('pt-BR')
-            ])
-        ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+        // Mostrar loading
+        const exportBtn = document.getElementById('exportData');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<iconify-icon icon="mdi:loading" class="animate-spin"></iconify-icon> Exportando...';
+        exportBtn.disabled = true;
         
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        showToast('Sucesso', 'Dados exportados com sucesso!', 'success');
+        try {
+            const csvContent = [
+                ['Nome', 'Email', 'Telefone', 'Cargo', 'Data de Cadastro'],
+                ...filteredUsuarios.map(u => [
+                    u.nome,
+                    u.email,
+                    u.telefone,
+                    u.cargo,
+                    new Date(u.dataCadastro).toLocaleDateString('pt-BR')
+                ])
+            ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('Sucesso', 'Dados exportados com sucesso!', 'success');
+        } catch (error) {
+            showToast('Erro', 'Erro ao exportar dados. Tente novamente.', 'error');
+        } finally {
+            // Restaurar botão
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }
     }
     
     function showToast(title, message, type = 'info') {
@@ -730,7 +912,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Event listener para fechar
         toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.remove();
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
         });
         
         toastContainer.appendChild(toast);
@@ -738,8 +926,71 @@ document.addEventListener("DOMContentLoaded", () => {
         // Auto remove após 5 segundos
         setTimeout(() => {
             if (toast.parentNode) {
-                toast.remove();
+                toast.style.transform = 'translateX(100%)';
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
             }
         }, 5000);
+        
+        // Adicionar feedback háptico no iOS
+        if (navigator.vibrate) {
+            navigator.vibrate(type === 'error' ? [100, 50, 100] : 50);
+        }
     }
+    
+    // Carregar preferências salvas
+    function loadPreferences() {
+        const savedView = localStorage.getItem('viewPreference');
+        if (savedView) {
+            setView(savedView);
+        }
+        
+        const savedItemsPerPage = localStorage.getItem('itemsPerPagePreference');
+        if (savedItemsPerPage) {
+            itemsPerPage = parseInt(savedItemsPerPage);
+            itemsPerPageSelect.value = itemsPerPage;
+        }
+    }
+    
+    // Carregar preferências na inicialização
+    loadPreferences();
+    
+    // Adicionar suporte a atalhos de teclado
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + K para focar na busca
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        
+        // Ctrl/Cmd + N para novo usuário
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            document.getElementById('nome').focus();
+        }
+        
+        // Ctrl/Cmd + E para exportar
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            exportData();
+        }
+    });
+    
+    // Adicionar classe CSS para animação de loading
+    const style = document.createElement('style');
+    style.textContent = `
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
 });
