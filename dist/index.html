@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistema de Usuários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Iconify - Ícones Online -->
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script> 
+  <link rel="stylesheet" crossorigin href="/assets/index-DVyJ2iar.css">
+</head>
+<body>
+
+  <header>
+    <h1><iconify-icon icon="mdi:account-group-outline"></iconify-icon> Sistema de Consulta de Usuários</h1>
+    <p class="subtitle">Gerencie usuários de forma simples e eficiente</p>
+  </header>
+
+  <main class="container">
+
+    <!-- Estatísticas -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <iconify-icon icon="mdi:account-multiple"></iconify-icon>
+        <div>
+          <span class="stat-number" id="totalUsers">0</span>
+          <span class="stat-label">Total de Usuários</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <iconify-icon icon="mdi:account-plus"></iconify-icon>
+        <div>
+          <span class="stat-number" id="newUsersToday">0</span>
+          <span class="stat-label">Novos Hoje</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <iconify-icon icon="mdi:magnify"></iconify-icon>
+        <div>
+          <span class="stat-number" id="filteredUsers">0</span>
+          <span class="stat-label">Resultados</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulário de Cadastro -->
+    <section class="form-section">
+      <h2><iconify-icon icon="mdi:account-plus"></iconify-icon> Cadastrar Novo Usuário</h2>
+      <form id="userForm">
+        <div class="form-group">
+          <label for="nome">Nome Completo:</label>
+          <input type="text" id="nome" required placeholder="Digite o nome completo" />
+          <span class="error-message" id="nomeError"></span>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required placeholder="exemplo@email.com" />
+          <span class="error-message" id="emailError"></span>
+        </div>
+        
+        <div class="form-group">
+          <label for="telefone">Telefone:</label>
+          <input type="text" id="telefone" required placeholder="(11) 99999-9999" />
+          <span class="error-message" id="telefoneError"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="cargo">Cargo:</label>
+          <select id="cargo" required>
+            <option value="">Selecione um cargo</option>
+            <option value="Desenvolvedor">Desenvolvedor</option>
+            <option value="Designer">Designer</option>
+            <option value="Gerente">Gerente</option>
+            <option value="Analista">Analista</option>
+            <option value="Coordenador">Coordenador</option>
+            <option value="Diretor">Diretor</option>
+            <option value="Estagiário">Estagiário</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <span class="error-message" id="cargoError"></span>
+        </div>
+        
+        <div class="form-group">
+          <label for="foto">Foto do Perfil:</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="foto" accept="image/*" />
+            <div class="file-preview" id="filePreview">
+              <iconify-icon icon="mdi:camera-plus"></iconify-icon>
+              <span>Clique para adicionar foto</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            <iconify-icon icon="mdi:content-save"></iconify-icon> Salvar Usuário
+          </button>
+          <button type="button" id="clearForm" class="btn-secondary">
+            <iconify-icon icon="mdi:refresh"></iconify-icon> Limpar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Controles de Busca e Filtros -->
+    <section class="controls-section">
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <iconify-icon icon="mdi:magnify"></iconify-icon>
+          <input type="text" id="searchInput" placeholder="Buscar por nome, email ou cargo..." />
+          <button type="button" id="clearSearch" class="clear-btn">
+            <iconify-icon icon="mdi:close"></iconify-icon>
+          </button>
+        </div>
+      </div>
+      
+      <div class="filters">
+        <select id="cargoFilter">
+          <option value="">Todos os cargos</option>
+          <option value="Desenvolvedor">Desenvolvedor</option>
+          <option value="Designer">Designer</option>
+          <option value="Gerente">Gerente</option>
+          <option value="Analista">Analista</option>
+          <option value="Coordenador">Coordenador</option>
+          <option value="Diretor">Diretor</option>
+          <option value="Estagiário">Estagiário</option>
+          <option value="Outro">Outro</option>
+        </select>
+        
+        <select id="sortBy">
+          <option value="nome">Ordenar por Nome</option>
+          <option value="email">Ordenar por Email</option>
+          <option value="cargo">Ordenar por Cargo</option>
+          <option value="data">Ordenar por Data</option>
+        </select>
+        
+        <button id="exportData" class="btn-export">
+          <iconify-icon icon="mdi:download"></iconify-icon> Exportar
+        </button>
+      </div>
+    </section>
+
+    <!-- Lista de Usuários -->
+    <section class="users-section">
+      <div class="section-header">
+        <h2><iconify-icon icon="mdi:account-group"></iconify-icon> Lista de Usuários</h2>
+        <div class="view-toggle">
+          <button id="gridView" class="view-btn active">
+            <iconify-icon icon="mdi:view-grid"></iconify-icon>
+          </button>
+          <button id="listView" class="view-btn">
+            <iconify-icon icon="mdi:view-list"></iconify-icon>
+          </button>
+        </div>
+      </div>
+      
+      <div id="usuariosContainer" class="usuarios-grid"></div>
+      
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <iconify-icon icon="mdi:account-search"></iconify-icon>
+        <h3>Nenhum usuário encontrado</h3>
+        <p>Tente ajustar os filtros de busca ou cadastre um novo usuário.</p>
+      </div>
+    </section>
+
+    <!-- Paginação -->
+    <nav class="pagination">
+      <button id="firstPage"><iconify-icon icon="mdi:page-first"></iconify-icon></button>
+      <button id="prevPage"><iconify-icon icon="mdi:arrow-left-bold"></iconify-icon></button>
+      <div class="page-numbers" id="pageNumbers"></div>
+      <button id="nextPage"><iconify-icon icon="mdi:arrow-right-bold"></iconify-icon></button>
+      <button id="lastPage"><iconify-icon icon="mdi:page-last"></iconify-icon></button>
+      <div class="page-info">
+        <span id="pageInfo">Página 1 de 1</span>
+        <select id="itemsPerPageSelect">
+          <option value="4">4 por página</option>
+          <option value="8">8 por página</option>
+          <option value="12">12 por página</option>
+          <option value="20">20 por página</option>
+        </select>
+      </div>
+    </nav>
+
+  </main>
+
+  <!-- Modal de Confirmação -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Confirmar Ação</h3>
+        <button class="modal-close" id="modalClose">
+          <iconify-icon icon="mdi:close"></iconify-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">Tem certeza que deseja realizar esta ação?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCancel" class="btn-secondary">Cancelar</button>
+        <button id="modalConfirm" class="btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Editar Usuário</h3>
+        <button class="modal-close" id="editModalClose">
+          <iconify-icon icon="mdi:close"></iconify-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <input type="hidden" id="editUserId" />
+          
+          <div class="form-group">
+            <label for="editNome">Nome Completo:</label>
+            <input type="text" id="editNome" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="editEmail">Email:</label>
+            <input type="email" id="editEmail" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="editTelefone">Telefone:</label>
+            <input type="text" id="editTelefone" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editCargo">Cargo:</label>
+            <select id="editCargo" required>
+              <option value="">Selecione um cargo</option>
+              <option value="Desenvolvedor">Desenvolvedor</option>
+              <option value="Designer">Designer</option>
+              <option value="Gerente">Gerente</option>
+              <option value="Analista">Analista</option>
+              <option value="Coordenador">Coordenador</option>
+              <option value="Diretor">Diretor</option>
+              <option value="Estagiário">Estagiário</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="editModalCancel" class="btn-secondary">Cancelar</button>
+        <button id="editModalSave" class="btn-primary">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
