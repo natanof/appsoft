@@ -14,5 +14,9 @@
   "description": "",
   "devDependencies": {
     "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.3",
+    "qr-scanner": "^1.4.2"
   }
 }

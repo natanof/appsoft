@@ -357,7 +357,9 @@ header h1 iconify-icon {
 .btn-primary,
 .btn-secondary,
 .btn-danger,
-.btn-export {
+.btn-export,
+.btn-scan,
+.btn-share {
   padding: var(--spacing-md) var(--spacing-lg);
   border: none;
   border-radius: var(--radius-md);
@@ -437,6 +439,36 @@ header h1 iconify-icon {
 }
 
 .btn-export:active {
+  transform: scale(0.95);
+}
+
+.btn-scan {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-scan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-scan:active {
+  transform: scale(0.95);
+}
+
+.btn-share {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+}
+
+.btn-share:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+}
+
+.btn-share:active {
   transform: scale(0.95);
 }
 
@@ -997,6 +1029,11 @@ header h1 iconify-icon {
   border: 0.5px solid var(--border-color);
 }
 
+.modal-content.qr-modal {
+  max-width: 600px;
+  max-height: 95vh;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -1010,6 +1047,13 @@ header h1 iconify-icon {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.modal-header h3 iconify-icon {
+  color: var(--primary-color);
 }
 
 .modal-close {
@@ -1045,6 +1089,219 @@ header h1 iconify-icon {
   padding: var(--spacing-lg);
   border-top: 0.5px solid var(--border-color);
   background: var(--background-color);
+}
+
+/* QR Scanner Styles */
+.qr-scanner-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000;
+}
+
+.qr-video {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+.qr-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.qr-frame {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+}
+
+.qr-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--primary-color);
+  border-radius: 3px;
+  animation: qrPulse 2s infinite;
+}
+
+.qr-corner-tl {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.qr-corner-tr {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.qr-corner-bl {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+.qr-corner-br {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+.qr-instructions {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+}
+
+.qr-instructions iconify-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-color);
+}
+
+.qr-instructions p {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.qr-controls {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.btn-flash,
+.btn-camera {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-flash:hover,
+.btn-camera:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-flash:active,
+.btn-camera:active {
+  transform: scale(0.95);
+}
+
+.btn-flash.active {
+  background: var(--warning-color);
+  color: white;
+}
+
+/* Share QR Styles */
+.share-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.share-option-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.share-option-btn:hover:not([disabled]) {
+  background: var(--primary-light);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.share-option-btn:active:not([disabled]) {
+  transform: scale(0.98);
+}
+
+.share-option-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.share-option-btn iconify-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.qr-code-container {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background: var(--background-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+#qrCanvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.qr-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* Toast Notifications iOS */
@@ -1257,6 +1514,17 @@ header h1 iconify-icon {
   }
 }
 
+@keyframes qrPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
 /* Estados de validação iOS */
 .form-group input:valid {
   border-color: var(--success-color);
@@ -1300,7 +1568,9 @@ header h1 iconify-icon {
   }
 
   .filters select,
-  .btn-export {
+  .btn-export,
+  .btn-scan,
+  .btn-share {
     width: 100%;
   }
 
@@ -1343,6 +1613,11 @@ header h1 iconify-icon {
     margin: var(--spacing-md);
   }
 
+  .modal-content.qr-modal {
+    width: 98%;
+    max-height: 98vh;
+  }
+
   .toast-container {
     left: var(--spacing-md);
     right: var(--spacing-md);
@@ -1350,6 +1625,33 @@ header h1 iconify-icon {
 
   .toast {
     min-width: auto;
+  }
+
+  .qr-scanner-container {
+    max-width: 100%;
+  }
+
+  .qr-video {
+    height: 250px;
+  }
+
+  .qr-frame {
+    width: 150px;
+    height: 150px;
+  }
+
+  .share-options {
+    gap: var(--spacing-sm);
+  }
+
+  .share-option-btn {
+    padding: var(--spacing-md);
+    font-size: 0.875rem;
+  }
+
+  .qr-actions {
+    flex-direction: column;
+    gap: var(--spacing-sm);
   }
 }
 
@@ -1367,9 +1669,25 @@ header h1 iconify-icon {
   }
 
   .btn-primary,
-  .btn-secondary {
+  .btn-secondary,
+  .btn-scan,
+  .btn-share {
     padding: var(--spacing-md);
     font-size: 0.875rem;
+  }
+
+  .qr-video {
+    height: 200px;
+  }
+
+  .qr-frame {
+    width: 120px;
+    height: 120px;
+  }
+
+  .qr-corner {
+    width: 15px;
+    height: 15px;
   }
 }
 
@@ -1381,7 +1699,10 @@ header h1 iconify-icon {
   .btn-secondary,
   .btn-danger,
   .btn-export,
-  .action-btn {
+  .btn-scan,
+  .btn-share,
+  .action-btn,
+  .share-option-btn {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;

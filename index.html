@@ -139,6 +139,14 @@
         <button id="exportData" class="btn-export">
           <iconify-icon icon="mdi:download"></iconify-icon> Exportar
         </button>
+
+        <button id="scanQRBtn" class="btn-scan">
+          <iconify-icon icon="mdi:qrcode-scan"></iconify-icon> Escanear QR
+        </button>
+
+        <button id="shareQRBtn" class="btn-share">
+          <iconify-icon icon="mdi:share-variant"></iconify-icon> Compartilhar
+        </button>
       </div>
     </section>
 
@@ -255,9 +263,85 @@
     </div>
   </div>
 
+  <!-- Modal do Scanner QR -->
+  <div id="qrScannerModal" class="modal">
+    <div class="modal-content qr-modal">
+      <div class="modal-header">
+        <h3><iconify-icon icon="mdi:qrcode-scan"></iconify-icon> Scanner QR Code</h3>
+        <button class="modal-close" id="qrScannerClose">
+          <iconify-icon icon="mdi:close"></iconify-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="qr-scanner-container">
+          <video id="qrVideo" class="qr-video"></video>
+          <div class="qr-overlay">
+            <div class="qr-frame">
+              <div class="qr-corner qr-corner-tl"></div>
+              <div class="qr-corner qr-corner-tr"></div>
+              <div class="qr-corner qr-corner-bl"></div>
+              <div class="qr-corner qr-corner-br"></div>
+            </div>
+            <div class="qr-instructions">
+              <iconify-icon icon="mdi:qrcode"></iconify-icon>
+              <p>Posicione o QR Code dentro da moldura</p>
+            </div>
+          </div>
+          <div class="qr-controls">
+            <button id="toggleFlashBtn" class="btn-flash">
+              <iconify-icon icon="mdi:flashlight"></iconify-icon>
+            </button>
+            <button id="switchCameraBtn" class="btn-camera">
+              <iconify-icon icon="mdi:camera-flip"></iconify-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Compartilhamento QR -->
+  <div id="shareQRModal" class="modal">
+    <div class="modal-content qr-modal">
+      <div class="modal-header">
+        <h3><iconify-icon icon="mdi:share-variant"></iconify-icon> Compartilhar Usuários</h3>
+        <button class="modal-close" id="shareQRClose">
+          <iconify-icon icon="mdi:close"></iconify-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="share-options">
+          <button id="shareAllBtn" class="share-option-btn">
+            <iconify-icon icon="mdi:account-group"></iconify-icon>
+            <span>Compartilhar Todos os Usuários</span>
+          </button>
+          <button id="shareFilteredBtn" class="share-option-btn">
+            <iconify-icon icon="mdi:filter"></iconify-icon>
+            <span>Compartilhar Usuários Filtrados</span>
+          </button>
+          <button id="shareSelectedBtn" class="share-option-btn" disabled>
+            <iconify-icon icon="mdi:check-circle"></iconify-icon>
+            <span>Compartilhar Selecionados</span>
+          </button>
+        </div>
+        <div id="qrCodeContainer" class="qr-code-container" style="display: none;">
+          <canvas id="qrCanvas"></canvas>
+          <div class="qr-actions">
+            <button id="downloadQRBtn" class="btn-primary">
+              <iconify-icon icon="mdi:download"></iconify-icon> Baixar QR Code
+            </button>
+            <button id="copyQRBtn" class="btn-secondary">
+              <iconify-icon icon="mdi:content-copy"></iconify-icon> Copiar Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notifications -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
