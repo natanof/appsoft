@@ -252,6 +252,7 @@ header h1 iconify-icon {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   background: var(--surface-color);
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   min-height: 44px; /* Tamanho mínimo para touch */
 }
@@ -632,6 +633,7 @@ header h1 iconify-icon {
   font-size: 16px; /* Previne zoom no iOS */
   min-width: 150px;
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007AFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.75rem center;
@@ -1146,6 +1148,7 @@ header h1 iconify-icon {
   background: var(--surface-color);
   font-size: 16px; /* Previne zoom no iOS */
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007AFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.25rem center;
@@ -1175,13 +1178,21 @@ header h1 iconify-icon {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding: var(--spacing-md);
+  align-items: center;
+  justify-content: center;
 }
 
 .modal.show {
   display: flex;
-  align-items: center;
-  justify-content: center;
   animation: iosFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Posicionamento especial para mobile */
+@media (max-width: 768px) {
+  .modal.show {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
 }
 
 .modal-content {
@@ -1379,6 +1390,7 @@ header h1 iconify-icon {
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   max-width: 90%;
 }
 
@@ -1417,6 +1429,7 @@ header h1 iconify-icon {
   font-size: 1.25rem;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -1640,6 +1653,51 @@ header h1 iconify-icon {
   background: var(--background-color);
   color: var(--danger-color);
   transform: scale(1.1);
+}
+
+/* Seleção de usuários */
+.usuario-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.usuario-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.usuario-checkbox label {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--surface-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.usuario-checkbox input[type="checkbox"]:checked + label {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.usuario-checkbox input[type="checkbox"]:checked + label::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.usuario-card.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-light);
 }
 
 /* Animações iOS */

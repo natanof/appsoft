@@ -1,161 +1,150 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Elementos do DOM
-    const userForm = document.getElementById("userForm");
-    const usuariosContainer = document.getElementById("usuariosContainer");
-    const searchInput = document.getElementById("searchInput");
-    const clearSearchBtn = document.getElementById("clearSearch");
-    const cargoFilter = document.getElementById("cargoFilter");
-    const sortBy = document.getElementById("sortBy");
-    const exportBtn = document.getElementById("exportData");
-    const gridViewBtn = document.getElementById("gridView");
-    const listViewBtn = document.getElementById("listView");
-    const itemsPerPageSelect = document.getElementById("itemsPerPageSelect");
+// Sistema de Usuários - Versão Mobile Otimizada
+document.addEventListener('DOMContentLoaded', () => {
+    // Elementos DOM
+    const userForm = document.getElementById('userForm');
+    const usuariosContainer = document.getElementById('usuariosContainer');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const cargoFilter = document.getElementById('cargoFilter');
+    const sortBy = document.getElementById('sortBy');
+    const exportData = document.getElementById('exportData');
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const itemsPerPageSelect = document.getElementById('itemsPerPageSelect');
+    const scanQRBtn = document.getElementById('scanQRBtn');
+    const shareQRBtn = document.getElementById('shareQRBtn');
+    const qrScannerModal = document.getElementById('qrScannerModal');
+    const shareQRModal = document.getElementById('shareQRModal');
     
-    // Elementos QR
-    const scanQRBtn = document.getElementById("scanQRBtn");
-    const shareQRBtn = document.getElementById("shareQRBtn");
-    const qrScannerModal = document.getElementById("qrScannerModal");
-    const shareQRModal = document.getElementById("shareQRModal");
+    // Botões de paginação
+    const firstPage = document.getElementById('firstPage');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const lastPage = document.getElementById('lastPage');
+    const pageNumbers = document.getElementById('pageNumbers');
+    const pageInfo = document.getElementById('pageInfo');
     
-    // Elementos de paginação
-    const firstPageBtn = document.getElementById("firstPage");
-    const prevPageBtn = document.getElementById("prevPage");
-    const nextPageBtn = document.getElementById("nextPage");
-    const lastPageBtn = document.getElementById("lastPage");
-    const pageNumbers = document.getElementById("pageNumbers");
-    const pageInfo = document.getElementById("pageInfo");
+    // Estatísticas
+    const totalUsers = document.getElementById('totalUsers');
+    const newUsersToday = document.getElementById('newUsersToday');
+    const filteredUsers = document.getElementById('filteredUsers');
     
-    // Elementos de estatísticas
-    const totalUsersEl = document.getElementById("totalUsers");
-    const newUsersTodayEl = document.getElementById("newUsersToday");
-    const filteredUsersEl = document.getElementById("filteredUsers");
+    // Modais
+    const confirmModal = document.getElementById('confirmModal');
+    const editModal = document.getElementById('editModal');
+    const emptyState = document.getElementById('emptyState');
     
-    // Elementos do modal
-    const confirmModal = document.getElementById("confirmModal");
-    const editModal = document.getElementById("editModal");
-    const emptyState = document.getElementById("emptyState");
+    // Input de foto
+    const fotoInput = document.getElementById('foto');
+    const filePreview = document.getElementById('filePreview');
     
-    // Elementos de preview de arquivo
-    const fotoInput = document.getElementById("foto");
-    const filePreview = document.getElementById("filePreview");
-    
-    // Estado da aplicação
+    // Variáveis globais
     let usuarios = [];
-    let filteredUsuarios = [];
-    let currentPage = 1;
-    let itemsPerPage = 4;
-    let currentView = 'grid';
-    let currentSort = 'nome';
-    let currentFilter = '';
-    let currentSearch = '';
-    
-    // QR Scanner variables
+    let usuariosFiltrados = [];
+    let paginaAtual = 1;
+    let itensPorPagina = 4;
+    let tipoVisualizacao = 'grid';
+    let ordenacao = 'nome';
+    let termoBusca = '';
+    let filtrocargo = '';
     let qrScanner = null;
-    let currentStream = null;
-    let facingMode = 'environment';
-    let flashEnabled = false;
-    let isScanning = false;
-    
+    let cameraMode = 'environment';
+    let flashOn = false;
+    let scannerActive = false;
+    let usuariosSelecionados = new Set();
+    let qrCodeCache = new Map();
+
     // Inicialização
     init();
-    
+
     function init() {
         try {
             carregarUsuarios();
-            setupEventListeners();
-            updateStats();
-            applyFiltersAndSort();
+            configurarEventListeners();
+            configurarValidacao();
+            aplicarFiltros();
             mostrarUsuarios();
-            updatePagination();
-            loadPreferences();
-            checkForImportData();
+            atualizarPaginacao();
+            configurarQREvents();
+            atualizarEstatisticas();
             
-            // Adicionar animações de entrada com delay
+            // Animação de entrada
             setTimeout(() => {
                 document.body.classList.add('loaded');
             }, 100);
             
-            // Adicionar suporte a PWA
-            setupPWA();
-            
+            // Service Worker
+            registerServiceWorker();
         } catch (error) {
             console.error('Erro na inicialização:', error);
             showToast('Erro', 'Erro ao inicializar o sistema. Recarregue a página.', 'error');
         }
     }
-    
-    function setupPWA() {
-        // Service Worker registration
+
+    function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(err => {
-                console.log('Service Worker registration failed:', err);
-            });
+            navigator.serviceWorker.register('/sw.js')
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
         }
-        
-        // Add to home screen prompt
-        let deferredPrompt;
+
+        // PWA install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            // Show install button if needed
         });
     }
-    
-    function setupEventListeners() {
+
+    function configurarEventListeners() {
         try {
-            // Formulário principal
-            userForm?.addEventListener("submit", handleFormSubmit);
-            document.getElementById("clearForm")?.addEventListener("click", clearForm);
+            // Formulário
+            userForm?.addEventListener('submit', handleFormSubmit);
+            document.getElementById('clearForm')?.addEventListener('click', limparFormulario);
             
-            // Busca e filtros
-            searchInput?.addEventListener("input", debounce(handleSearch, 300));
-            clearSearchBtn?.addEventListener("click", clearSearch);
-            cargoFilter?.addEventListener("change", handleFilter);
-            sortBy?.addEventListener("change", handleSort);
+            // Busca
+            searchInput?.addEventListener('input', debounce(handleSearch, 300));
+            clearSearch?.addEventListener('click', limparBusca);
+            
+            // Filtros
+            cargoFilter?.addEventListener('change', handleCargoFilter);
+            sortBy?.addEventListener('change', handleSort);
             
             // Visualização
-            gridViewBtn?.addEventListener("click", () => setView('grid'));
-            listViewBtn?.addEventListener("click", () => setView('list'));
+            gridView?.addEventListener('click', () => alterarVisualizacao('grid'));
+            listView?.addEventListener('click', () => alterarVisualizacao('list'));
             
             // Paginação
-            firstPageBtn?.addEventListener("click", () => goToPage(1));
-            prevPageBtn?.addEventListener("click", () => goToPage(currentPage - 1));
-            nextPageBtn?.addEventListener("click", () => goToPage(currentPage + 1));
-            lastPageBtn?.addEventListener("click", () => goToPage(getTotalPages()));
-            itemsPerPageSelect?.addEventListener("change", handleItemsPerPageChange);
+            firstPage?.addEventListener('click', () => irParaPagina(1));
+            prevPage?.addEventListener('click', () => irParaPagina(paginaAtual - 1));
+            nextPage?.addEventListener('click', () => irParaPagina(paginaAtual + 1));
+            lastPage?.addEventListener('click', () => irParaPagina(getTotalPaginas()));
+            itemsPerPageSelect?.addEventListener('change', handleItemsPerPageChange);
             
-            // Export
-            exportBtn?.addEventListener("click", exportData);
+            // Exportar
+            exportData?.addEventListener('click', exportarDados);
             
-            // QR Code functionality
-            scanQRBtn?.addEventListener("click", openQRScanner);
-            shareQRBtn?.addEventListener("click", openShareQR);
+            // QR Code
+            scanQRBtn?.addEventListener('click', abrirScannerQR);
+            shareQRBtn?.addEventListener('click', abrirCompartilhamentoQR);
             
-            // Preview de arquivo
-            fotoInput?.addEventListener("change", handleFilePreview);
+            // Foto
+            fotoInput?.addEventListener('change', handleFileChange);
             
-            // Modal events
+            // Eventos globais
+            setupGlobalEvents();
             setupModalEvents();
-            setupQRModalEvents();
-            
-            // Validação em tempo real
-            setupRealTimeValidation();
-            
-            // Eventos de toque para iOS
+            setupQREvents();
+            setupKeyboardShortcuts();
             setupTouchEvents();
             
-            // Keyboard shortcuts
-            setupKeyboardShortcuts();
-            
-            // Window events
+            // Responsividade
             window.addEventListener('resize', debounce(handleResize, 250));
             window.addEventListener('orientationchange', handleOrientationChange);
-            
         } catch (error) {
             console.error('Erro ao configurar event listeners:', error);
         }
     }
-    
+
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -167,160 +156,165 @@ document.addEventListener("DOMContentLoaded", () => {
             timeout = setTimeout(later, wait);
         };
     }
-    
+
     function handleResize() {
-        // Ajustar layout em mudanças de tamanho
         if (qrScanner && qrScannerModal.classList.contains('show')) {
-            // Reajustar scanner se necessário
             qrScanner.stop();
             setTimeout(() => {
                 if (qrScanner) qrScanner.start();
             }, 100);
         }
     }
-    
+
     function handleOrientationChange() {
-        // Aguardar a mudança de orientação completar
         setTimeout(() => {
             handleResize();
         }, 500);
     }
-    
+
     function setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + K para focar na busca
+            // Ctrl/Cmd + K - Focar busca
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 searchInput?.focus();
             }
             
-            // Ctrl/Cmd + N para novo usuário
+            // Ctrl/Cmd + N - Focar nome
             if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
                 e.preventDefault();
                 document.getElementById('nome')?.focus();
             }
             
-            // Ctrl/Cmd + E para exportar
+            // Ctrl/Cmd + E - Exportar
             if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
                 e.preventDefault();
-                exportData();
+                exportarDados();
             }
             
-            // Ctrl/Cmd + S para scanner QR
+            // Ctrl/Cmd + S - Scanner QR
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                openQRScanner();
+                abrirScannerQR();
             }
             
-            // Ctrl/Cmd + Shift + S para compartilhar QR
+            // Ctrl/Cmd + Shift + S - Compartilhar QR
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
                 e.preventDefault();
-                openShareQR();
+                abrirCompartilhamentoQR();
             }
             
-            // ESC para fechar modais
+            // ESC - Fechar modais
             if (e.key === 'Escape') {
-                closeAllModals();
+                fecharTodosModais();
             }
         });
     }
-    
-    function closeAllModals() {
-        closeConfirmModal();
-        closeEditModal();
-        closeQRScanner();
-        closeShareQR();
+
+    function fecharTodosModais() {
+        fecharModalConfirmacao();
+        fecharModalEdicao();
+        fecharScannerQR();
+        fecharCompartilhamentoQR();
     }
-    
-    function setupQRModalEvents() {
+
+    function setupQREvents() {
         try {
-            // QR Scanner Modal
-            document.getElementById("qrScannerClose")?.addEventListener("click", closeQRScanner);
-            document.getElementById("toggleFlashBtn")?.addEventListener("click", toggleFlash);
-            document.getElementById("switchCameraBtn")?.addEventListener("click", switchCamera);
+            // Scanner QR
+            document.getElementById('qrScannerClose')?.addEventListener('click', fecharScannerQR);
+            document.getElementById('toggleFlashBtn')?.addEventListener('click', toggleFlash);
+            document.getElementById('switchCameraBtn')?.addEventListener('click', switchCamera);
             
-            // Share QR Modal
-            document.getElementById("shareQRClose")?.addEventListener("click", closeShareQR);
-            document.getElementById("shareAllBtn")?.addEventListener("click", () => generateQRCode('all'));
-            document.getElementById("shareFilteredBtn")?.addEventListener("click", () => generateQRCode('filtered'));
-            document.getElementById("shareSelectedBtn")?.addEventListener("click", () => generateQRCode('selected'));
-            document.getElementById("downloadQRBtn")?.addEventListener("click", downloadQRCode);
-            document.getElementById("copyQRBtn")?.addEventListener("click", copyQRLink);
+            // Compartilhamento QR
+            document.getElementById('shareQRClose')?.addEventListener('click', fecharCompartilhamentoQR);
+            document.getElementById('shareAllBtn')?.addEventListener('click', () => gerarQRCode('all'));
+            document.getElementById('shareFilteredBtn')?.addEventListener('click', () => gerarQRCode('filtered'));
+            document.getElementById('shareSelectedBtn')?.addEventListener('click', () => gerarQRCode('selected'));
+            document.getElementById('downloadQRBtn')?.addEventListener('click', baixarQRCode);
+            document.getElementById('copyQRBtn')?.addEventListener('click', copiarLinkQR);
             
-            // Close modals on backdrop click
-            qrScannerModal?.addEventListener("click", (e) => {
-                if (e.target === qrScannerModal) closeQRScanner();
+            // Fechar modal clicando fora
+            qrScannerModal?.addEventListener('click', (e) => {
+                if (e.target === qrScannerModal) fecharScannerQR();
             });
             
-            shareQRModal?.addEventListener("click", (e) => {
-                if (e.target === shareQRModal) closeShareQR();
+            shareQRModal?.addEventListener('click', (e) => {
+                if (e.target === shareQRModal) fecharCompartilhamentoQR();
             });
-            
         } catch (error) {
             console.error('Erro ao configurar eventos QR:', error);
         }
     }
-    
-    async function openQRScanner() {
+
+    // Scanner QR
+    async function abrirScannerQR() {
         try {
-            // Check if camera is available
+            // Verificar suporte à câmera
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 showToast('Erro', 'Câmera não disponível neste dispositivo.', 'error');
                 return;
             }
-            
-            // Check permissions
+
+            // Verificar permissões
             try {
                 const permission = await navigator.permissions.query({ name: 'camera' });
                 if (permission.state === 'denied') {
                     showToast('Erro', 'Permissão de câmera negada. Verifique as configurações do navegador.', 'error');
                     return;
                 }
-            } catch (permError) {
+            } catch {
                 console.log('Permission API not supported');
             }
-            
+
+            // Abrir modal
             qrScannerModal.classList.add('show');
-            document.body.style.overflow = 'hidden'; // Prevent background scroll
+            document.body.style.overflow = 'hidden';
             
-            // Show loading state
+            // Posicionar modal no topo para mobile
+            if (window.innerWidth <= 768) {
+                qrScannerModal.style.alignItems = 'flex-start';
+                qrScannerModal.style.paddingTop = '20px';
+            }
+
             const video = document.getElementById('qrVideo');
             const overlay = document.querySelector('.qr-overlay');
+            
+            // Loading state
             overlay.innerHTML = `
                 <div style="color: white; text-align: center;">
                     <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 16px;"></div>
                     <p>Iniciando câmera...</p>
                 </div>
             `;
-            
-            // Import QR Scanner dynamically with error handling
+
+            // Carregar QR Scanner dinamicamente
             let QrScanner;
             try {
-                const module = await import('https://cdn.skypack.dev/qr-scanner@1.4.2');
-                QrScanner = module.default;
-            } catch (importError) {
-                console.error('Erro ao carregar QR Scanner:', importError);
+                QrScanner = (await import('https://cdn.skypack.dev/qr-scanner@1.4.2')).default;
+            } catch (error) {
+                console.error('Erro ao carregar QR Scanner:', error);
                 showToast('Erro', 'Erro ao carregar o scanner. Verifique sua conexão.', 'error');
-                closeQRScanner();
+                fecharScannerQR();
                 return;
             }
-            
-            // Initialize QR Scanner with better error handling
-            qrScanner = new QrScanner(video, result => {
-                if (!isScanning) return;
-                handleQRResult(result.data || result);
+
+            // Criar scanner
+            qrScanner = new QrScanner(video, (result) => {
+                if (scannerActive) {
+                    processarQRCode(result.data || result);
+                }
             }, {
                 highlightScanRegion: true,
                 highlightCodeOutline: true,
-                preferredCamera: facingMode,
+                preferredCamera: cameraMode,
                 maxScansPerSecond: 5,
-                returnDetailedScanResult: true,
+                returnDetailedScanResult: true
             });
-            
-            isScanning = true;
+
+            scannerActive = true;
             await qrScanner.start();
-            
-            // Restore overlay after successful start
+
+            // UI do scanner
             overlay.innerHTML = `
                 <div class="qr-frame">
                     <div class="qr-corner qr-corner-tl"></div>
@@ -333,41 +327,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p>Posicione o QR Code dentro da moldura</p>
                 </div>
             `;
-            
-            // Update flash button visibility
+
+            // Verificar flash
             try {
                 const hasFlash = await qrScanner.hasFlash();
                 const flashBtn = document.getElementById('toggleFlashBtn');
                 if (flashBtn) {
                     flashBtn.style.display = hasFlash ? 'flex' : 'none';
                 }
-            } catch (flashError) {
+            } catch {
                 console.log('Flash not available');
             }
-            
+
             showToast('Sucesso', 'Scanner QR iniciado. Posicione o código na moldura.', 'success');
-            
+
         } catch (error) {
             console.error('Erro ao iniciar scanner QR:', error);
-            isScanning = false;
+            scannerActive = false;
             
-            let errorMessage = 'Erro ao acessar a câmera.';
+            let message = 'Erro ao acessar a câmera.';
             if (error.name === 'NotAllowedError') {
-                errorMessage = 'Permissão de câmera negada. Permita o acesso à câmera.';
+                message = 'Permissão de câmera negada. Permita o acesso à câmera.';
             } else if (error.name === 'NotFoundError') {
-                errorMessage = 'Nenhuma câmera encontrada no dispositivo.';
+                message = 'Nenhuma câmera encontrada no dispositivo.';
             } else if (error.name === 'NotReadableError') {
-                errorMessage = 'Câmera está sendo usada por outro aplicativo.';
+                message = 'Câmera está sendo usada por outro aplicativo.';
             }
             
-            showToast('Erro', errorMessage, 'error');
-            closeQRScanner();
+            showToast('Erro', message, 'error');
+            fecharScannerQR();
         }
     }
-    
-    function closeQRScanner() {
+
+    function fecharScannerQR() {
         try {
-            isScanning = false;
+            scannerActive = false;
             
             if (qrScanner) {
                 qrScanner.stop();
@@ -376,33 +370,32 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             qrScannerModal.classList.remove('show');
-            document.body.style.overflow = ''; // Restore scroll
-            flashEnabled = false;
+            document.body.style.overflow = '';
+            qrScannerModal.style.alignItems = '';
+            qrScannerModal.style.paddingTop = '';
+            flashOn = false;
             
             const flashBtn = document.getElementById('toggleFlashBtn');
-            if (flashBtn) {
-                flashBtn.classList.remove('active');
-            }
-            
+            if (flashBtn) flashBtn.classList.remove('active');
         } catch (error) {
             console.error('Erro ao fechar scanner:', error);
         }
     }
-    
+
     async function toggleFlash() {
         if (!qrScanner) return;
         
         try {
             const flashBtn = document.getElementById('toggleFlashBtn');
             
-            if (flashEnabled) {
+            if (flashOn) {
                 await qrScanner.turnFlashOff();
-                flashEnabled = false;
+                flashOn = false;
                 flashBtn?.classList.remove('active');
                 showToast('Info', 'Flash desligado', 'info');
             } else {
                 await qrScanner.turnFlashOn();
-                flashEnabled = true;
+                flashOn = true;
                 flashBtn?.classList.add('active');
                 showToast('Info', 'Flash ligado', 'info');
             }
@@ -411,32 +404,28 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Erro', 'Erro ao controlar o flash.', 'error');
         }
     }
-    
+
     async function switchCamera() {
         if (!qrScanner) return;
         
         try {
-            facingMode = facingMode === 'environment' ? 'user' : 'environment';
-            await qrScanner.setCamera(facingMode);
-            
-            const cameraName = facingMode === 'environment' ? 'traseira' : 'frontal';
-            showToast('Info', `Câmera ${cameraName} ativada`, 'info');
+            cameraMode = cameraMode === 'environment' ? 'user' : 'environment';
+            await qrScanner.setCamera(cameraMode);
+            showToast('Info', `Câmera ${cameraMode === 'environment' ? 'traseira' : 'frontal'} ativada`, 'info');
         } catch (error) {
             console.error('Erro ao trocar câmera:', error);
             showToast('Erro', 'Erro ao trocar câmera.', 'error');
         }
     }
-    
-    function handleQRResult(data) {
+
+    function processarQRCode(data) {
         try {
-            if (!isScanning) return;
+            if (!scannerActive) return;
             
-            // Parse QR code data
             const qrData = JSON.parse(data);
-            
             if (qrData.type === 'usuarios' && Array.isArray(qrData.data)) {
-                importUsers(qrData.data);
-                closeQRScanner();
+                importarUsuarios(qrData.data);
+                fecharScannerQR();
             } else {
                 showToast('Erro', 'QR Code não contém dados de usuários válidos.', 'error');
             }
@@ -445,138 +434,145 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Erro', 'QR Code inválido ou corrompido.', 'error');
         }
     }
-    
-    function importUsers(importedUsers) {
+
+    function importarUsuarios(dadosUsuarios) {
         try {
-            let importedCount = 0;
-            let duplicateCount = 0;
+            let novosUsuarios = 0;
+            let usuariosExistentes = 0;
             
-            importedUsers.forEach(user => {
-                // Check if user already exists (by email)
-                const existingUser = usuarios.find(u => 
-                    u.email.toLowerCase() === user.email.toLowerCase()
+            dadosUsuarios.forEach(userData => {
+                const usuarioExistente = usuarios.find(u => 
+                    u.email.toLowerCase() === userData.email.toLowerCase()
                 );
                 
-                if (!existingUser) {
-                    // Generate new ID and add user
-                    const newUser = {
-                        ...user,
+                if (usuarioExistente) {
+                    usuariosExistentes++;
+                } else {
+                    const novoUsuario = {
+                        ...userData,
                         id: Date.now() + Math.random(),
                         dataCadastro: new Date().toISOString()
                     };
-                    usuarios.unshift(newUser);
-                    importedCount++;
-                } else {
-                    duplicateCount++;
+                    usuarios.unshift(novoUsuario);
+                    novosUsuarios++;
                 }
             });
             
-            if (importedCount > 0) {
+            if (novosUsuarios > 0) {
                 salvarUsuarios();
-                applyFiltersAndSort();
+                aplicarFiltros();
                 mostrarUsuarios();
-                updatePagination();
-                goToPage(1);
+                atualizarPaginacao();
+                irParaPagina(1);
             }
             
-            // Show result message
             let message = '';
-            if (importedCount > 0) {
-                message += `${importedCount} usuário(s) importado(s) com sucesso!`;
+            if (novosUsuarios > 0) {
+                message += `${novosUsuarios} usuário(s) importado(s) com sucesso!`;
             }
-            if (duplicateCount > 0) {
-                message += ` ${duplicateCount} usuário(s) já existente(s) foram ignorados.`;
+            if (usuariosExistentes > 0) {
+                message += ` ${usuariosExistentes} usuário(s) já existente(s) foram ignorados.`;
             }
             
-            showToast('Importação', message || 'Nenhum usuário novo foi importado.', importedCount > 0 ? 'success' : 'warning');
-            
+            showToast('Importação', message || 'Nenhum usuário novo foi importado.', 
+                     novosUsuarios > 0 ? 'success' : 'warning');
         } catch (error) {
             console.error('Erro ao importar usuários:', error);
             showToast('Erro', 'Erro ao importar usuários.', 'error');
         }
     }
-    
-    function openShareQR() {
+
+    // Compartilhamento QR
+    function abrirCompartilhamentoQR() {
         try {
             shareQRModal.classList.add('show');
             document.body.style.overflow = 'hidden';
             
-            // Update button states
-            const shareSelectedBtn = document.getElementById('shareSelectedBtn');
-            if (shareSelectedBtn) {
-                shareSelectedBtn.disabled = true; // For now, selection feature not implemented
+            // Posicionar modal no topo para mobile
+            if (window.innerWidth <= 768) {
+                shareQRModal.style.alignItems = 'flex-start';
+                shareQRModal.style.paddingTop = '20px';
             }
             
-            // Hide QR code container initially
+            // Atualizar botão de selecionados
+            const shareSelectedBtn = document.getElementById('shareSelectedBtn');
+            if (shareSelectedBtn) {
+                shareSelectedBtn.disabled = usuariosSelecionados.size === 0;
+            }
+            
+            // Limpar QR anterior
             const qrContainer = document.getElementById('qrCodeContainer');
             if (qrContainer) {
                 qrContainer.style.display = 'none';
             }
-            
         } catch (error) {
             console.error('Erro ao abrir modal de compartilhamento:', error);
         }
     }
-    
-    function closeShareQR() {
+
+    function fecharCompartilhamentoQR() {
         try {
             shareQRModal.classList.remove('show');
             document.body.style.overflow = '';
+            shareQRModal.style.alignItems = '';
+            shareQRModal.style.paddingTop = '';
             
+            // Limpar QR
             const qrContainer = document.getElementById('qrCodeContainer');
             if (qrContainer) {
                 qrContainer.style.display = 'none';
             }
-            
         } catch (error) {
             console.error('Erro ao fechar modal de compartilhamento:', error);
         }
     }
-    
-    async function generateQRCode(type) {
+
+    async function gerarQRCode(tipo) {
         try {
-            let dataToShare = [];
-            let title = '';
+            let dadosParaCompartilhar = [];
+            let titulo = '';
             
-            switch (type) {
+            switch (tipo) {
                 case 'all':
-                    dataToShare = usuarios;
-                    title = 'Todos os Usuários';
+                    dadosParaCompartilhar = usuarios;
+                    titulo = 'Todos os Usuários';
                     break;
                 case 'filtered':
-                    dataToShare = filteredUsuarios;
-                    title = 'Usuários Filtrados';
+                    dadosParaCompartilhar = usuariosFiltrados;
+                    titulo = 'Usuários Filtrados';
                     break;
                 case 'selected':
-                    // TODO: Implement selection functionality
-                    dataToShare = [];
-                    title = 'Usuários Selecionados';
+                    dadosParaCompartilhar = usuarios.filter(u => usuariosSelecionados.has(u.id));
+                    titulo = 'Usuários Selecionados';
                     break;
             }
             
-            if (dataToShare.length === 0) {
+            if (dadosParaCompartilhar.length === 0) {
                 showToast('Aviso', 'Nenhum usuário para compartilhar.', 'warning');
                 return;
             }
             
-            // Show loading
             const qrContainer = document.getElementById('qrCodeContainer');
-            if (qrContainer) {
-                qrContainer.style.display = 'block';
-                qrContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 16px;"></div>
-                        <p>Gerando QR Code...</p>
-                    </div>
-                `;
-            }
+            if (!qrContainer) return;
             
-            // Prepare data for QR code
+            qrContainer.style.display = 'block';
+            
+            // Verificar cache
+            const cacheKey = `${tipo}-${dadosParaCompartilhar.length}-${Date.now()}`;
+            
+            // Loading state
+            qrContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 16px;"></div>
+                    <p>Gerando QR Code...</p>
+                </div>
+            `;
+            
             const qrData = {
                 type: 'usuarios',
-                title: title,
+                title: titulo,
                 timestamp: new Date().toISOString(),
-                data: dataToShare.map(user => ({
+                data: dadosParaCompartilhar.map(user => ({
                     nome: user.nome,
                     email: user.email,
                     telefone: user.telefone,
@@ -585,24 +581,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 }))
             };
             
-            // Import QRCode library dynamically
+            // Carregar QRCode dinamicamente
             let QRCode;
             try {
-                const module = await import('https://cdn.skypack.dev/qrcode@1.5.3');
-                QRCode = module.default;
-            } catch (importError) {
-                console.error('Erro ao carregar QRCode:', importError);
+                QRCode = (await import('https://cdn.skypack.dev/qrcode@1.5.3')).default;
+            } catch (error) {
+                console.error('Erro ao carregar QRCode:', error);
                 showToast('Erro', 'Erro ao carregar gerador de QR Code.', 'error');
                 return;
             }
             
             const qrString = JSON.stringify(qrData);
-            
-            // Create canvas element
             const canvas = document.createElement('canvas');
             canvas.id = 'qrCanvas';
             
-            // Generate QR code
             await QRCode.toCanvas(canvas, qrString, {
                 width: Math.min(300, window.innerWidth - 100),
                 margin: 2,
@@ -613,43 +605,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 errorCorrectionLevel: 'M'
             });
             
-            // Update container with QR code
-            if (qrContainer) {
-                qrContainer.innerHTML = `
-                    <div style="text-align: center;">
-                        <h4 style="margin-bottom: 16px; color: var(--text-primary);">${title}</h4>
-                    </div>
-                    <div class="qr-actions">
-                        <button id="downloadQRBtn" class="btn-primary">
-                            <iconify-icon icon="mdi:download"></iconify-icon> Baixar QR Code
-                        </button>
-                        <button id="copyQRBtn" class="btn-secondary">
-                            <iconify-icon icon="mdi:content-copy"></iconify-icon> Copiar Link
-                        </button>
-                    </div>
-                `;
-                
-                // Insert canvas
-                qrContainer.insertBefore(canvas, qrContainer.querySelector('.qr-actions'));
-                
-                // Store data for download/copy
-                canvas.dataset.qrData = qrString;
-                canvas.dataset.title = title;
-                
-                // Re-attach event listeners
-                document.getElementById("downloadQRBtn")?.addEventListener("click", downloadQRCode);
-                document.getElementById("copyQRBtn")?.addEventListener("click", copyQRLink);
-            }
+            // Atualizar UI
+            qrContainer.innerHTML = `
+                <div style="text-align: center;">
+                    <h4 style="margin-bottom: 16px; color: var(--text-primary);">${titulo}</h4>
+                </div>
+                <div class="qr-actions">
+                    <button id="downloadQRBtn" class="btn-primary">
+                        <iconify-icon icon="mdi:download"></iconify-icon> Baixar QR Code
+                    </button>
+                    <button id="copyQRBtn" class="btn-secondary">
+                        <iconify-icon icon="mdi:content-copy"></iconify-icon> Copiar Link
+                    </button>
+                </div>
+            `;
             
-            showToast('Sucesso', `QR Code gerado para ${title.toLowerCase()}!`, 'success');
+            qrContainer.insertBefore(canvas, qrContainer.querySelector('.qr-actions'));
+            
+            // Armazenar dados no canvas
+            canvas.dataset.qrData = qrString;
+            canvas.dataset.title = titulo;
+            
+            // Reconfigurar eventos
+            document.getElementById('downloadQRBtn')?.addEventListener('click', baixarQRCode);
+            document.getElementById('copyQRBtn')?.addEventListener('click', copiarLinkQR);
+            
+            showToast('Sucesso', `QR Code gerado para ${titulo.toLowerCase()}!`, 'success');
             
         } catch (error) {
             console.error('Erro ao gerar QR Code:', error);
             showToast('Erro', 'Erro ao gerar QR Code. Tente novamente.', 'error');
         }
     }
-    
-    function downloadQRCode() {
+
+    function baixarQRCode() {
         try {
             const canvas = document.getElementById('qrCanvas');
             if (!canvas) {
@@ -657,27 +646,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             
-            const title = canvas.dataset.title || 'usuarios';
-            
-            // Create download link
+            const titulo = canvas.dataset.title || 'usuarios';
             const link = document.createElement('a');
-            link.download = `qr-code-${title.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.png`;
+            link.download = `qr-code-${titulo.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.png`;
             link.href = canvas.toDataURL('image/png');
             
-            // Trigger download
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
             showToast('Sucesso', 'QR Code baixado com sucesso!', 'success');
-            
         } catch (error) {
             console.error('Erro ao baixar QR Code:', error);
             showToast('Erro', 'Erro ao baixar QR Code.', 'error');
         }
     }
-    
-    async function copyQRLink() {
+
+    async function copiarLinkQR() {
         try {
             const canvas = document.getElementById('qrCanvas');
             if (!canvas) {
@@ -691,16 +676,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             
-            // Create a shareable link (in a real app, you'd upload to a server)
             const encodedData = btoa(encodeURIComponent(qrData));
-            const shareableLink = `${window.location.origin}${window.location.pathname}?import=${encodedData}`;
+            const shareUrl = `${window.location.origin}${window.location.pathname}?import=${encodedData}`;
             
             if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(shareableLink);
+                await navigator.clipboard.writeText(shareUrl);
             } else {
-                // Fallback for older browsers or non-HTTPS
+                // Fallback para dispositivos sem clipboard API
                 const textArea = document.createElement('textarea');
-                textArea.value = shareableLink;
+                textArea.value = shareUrl;
                 textArea.style.position = 'fixed';
                 textArea.style.left = '-999999px';
                 textArea.style.top = '-999999px';
@@ -712,15 +696,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             showToast('Sucesso', 'Link copiado para a área de transferência!', 'success');
-            
         } catch (error) {
             console.error('Erro ao copiar link:', error);
             showToast('Erro', 'Erro ao copiar link.', 'error');
         }
     }
-    
-    // Check for import parameter on page load
-    function checkForImportData() {
+
+    // Verificar dados de importação na URL
+    function verificarDadosImportacao() {
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const importData = urlParams.get('import');
@@ -731,32 +714,62 @@ document.addEventListener("DOMContentLoaded", () => {
                     const qrData = JSON.parse(decodedData);
                     
                     if (qrData.type === 'usuarios' && Array.isArray(qrData.data)) {
-                        // Ask user if they want to import
                         if (confirm(`Deseja importar ${qrData.data.length} usuário(s) compartilhado(s)?`)) {
-                            importUsers(qrData.data);
+                            importarUsuarios(qrData.data);
                         }
                     }
                     
-                    // Clean URL
+                    // Limpar URL
                     window.history.replaceState({}, document.title, window.location.pathname);
-                } catch (parseError) {
-                    console.error('Erro ao processar dados de importação:', parseError);
+                } catch (error) {
+                    console.error('Erro ao processar dados de importação:', error);
                 }
             }
         } catch (error) {
             console.error('Erro ao verificar dados de importação:', error);
         }
     }
-    
-    function setupTouchEvents() {
-        // Adicionar feedback tátil para botões em dispositivos iOS
-        const buttons = document.querySelectorAll('button, .btn-primary, .btn-secondary, .btn-danger, .btn-export, .btn-scan, .btn-share');
+
+    // Seleção de usuários
+    function toggleUsuarioSelecionado(userId) {
+        if (usuariosSelecionados.has(userId)) {
+            usuariosSelecionados.delete(userId);
+        } else {
+            usuariosSelecionados.add(userId);
+        }
         
-        buttons.forEach(button => {
+        // Atualizar UI
+        atualizarBotaoSelecionados();
+        atualizarVisualizacaoSelecao();
+    }
+
+    function atualizarBotaoSelecionados() {
+        const shareSelectedBtn = document.getElementById('shareSelectedBtn');
+        if (shareSelectedBtn) {
+            shareSelectedBtn.disabled = usuariosSelecionados.size === 0;
+            shareSelectedBtn.innerHTML = `
+                <iconify-icon icon="mdi:check-circle"></iconify-icon>
+                <span>Compartilhar Selecionados (${usuariosSelecionados.size})</span>
+            `;
+        }
+    }
+
+    function atualizarVisualizacaoSelecao() {
+        document.querySelectorAll('.usuario-card').forEach(card => {
+            const userId = parseInt(card.dataset.userId);
+            if (usuariosSelecionados.has(userId)) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    }
+
+    function setupTouchEvents() {
+        // Melhorar feedback tátil em dispositivos móveis
+        document.querySelectorAll('button, .btn-primary, .btn-secondary, .btn-danger, .btn-export, .btn-scan, .btn-share').forEach(button => {
             button.addEventListener('touchstart', function(e) {
                 this.style.transform = 'scale(0.95)';
-                
-                // Haptic feedback
                 if (navigator.vibrate) {
                     navigator.vibrate(10);
                 }
@@ -772,8 +785,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.style.transform = '';
             }, { passive: true });
         });
-        
-        // Adicionar suporte a swipe para cards de usuário
+
+        // Gestos de swipe
         let startX, startY, currentX, currentY;
         
         document.addEventListener('touchstart', (e) => {
@@ -790,59 +803,57 @@ document.addEventListener("DOMContentLoaded", () => {
             const diffX = startX - currentX;
             const diffY = startY - currentY;
             
-            // Prevenir scroll horizontal desnecessário
+            // Prevenir scroll horizontal em swipes
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
                 e.preventDefault();
             }
         }, { passive: false });
     }
-    
+
     function setupModalEvents() {
         try {
-            // Confirm Modal
-            document.getElementById("modalClose")?.addEventListener("click", closeConfirmModal);
-            document.getElementById("modalCancel")?.addEventListener("click", closeConfirmModal);
-            document.getElementById("modalConfirm")?.addEventListener("click", handleConfirmAction);
+            // Modal de confirmação
+            document.getElementById('modalClose')?.addEventListener('click', fecharModalConfirmacao);
+            document.getElementById('modalCancel')?.addEventListener('click', fecharModalConfirmacao);
+            document.getElementById('modalConfirm')?.addEventListener('click', confirmarAcao);
             
-            // Edit Modal
-            document.getElementById("editModalClose")?.addEventListener("click", closeEditModal);
-            document.getElementById("editModalCancel")?.addEventListener("click", closeEditModal);
-            document.getElementById("editModalSave")?.addEventListener("click", handleEditSave);
+            // Modal de edição
+            document.getElementById('editModalClose')?.addEventListener('click', fecharModalEdicao);
+            document.getElementById('editModalCancel')?.addEventListener('click', fecharModalEdicao);
+            document.getElementById('editModalSave')?.addEventListener('click', salvarEdicao);
             
-            // Close modal on backdrop click
-            confirmModal?.addEventListener("click", (e) => {
-                if (e.target === confirmModal) closeConfirmModal();
+            // Fechar modal clicando fora
+            confirmModal?.addEventListener('click', (e) => {
+                if (e.target === confirmModal) fecharModalConfirmacao();
             });
             
-            editModal?.addEventListener("click", (e) => {
-                if (e.target === editModal) closeEditModal();
+            editModal?.addEventListener('click', (e) => {
+                if (e.target === editModal) fecharModalEdicao();
             });
-            
         } catch (error) {
             console.error('Erro ao configurar eventos de modal:', error);
         }
     }
-    
-    function setupRealTimeValidation() {
+
+    function configurarValidacao() {
         try {
-            const inputs = [
-                { id: 'nome', validator: validateNome },
-                { id: 'email', validator: validateEmail },
-                { id: 'telefone', validator: validateTelefone },
-                { id: 'cargo', validator: validateCargo }
+            const campos = [
+                { id: 'nome', validator: validarNome },
+                { id: 'email', validator: validarEmail },
+                { id: 'telefone', validator: validarTelefone },
+                { id: 'cargo', validator: validarCargo }
             ];
-            
-            inputs.forEach(({ id, validator }) => {
+
+            campos.forEach(({ id, validator }) => {
                 const input = document.getElementById(id);
-                const errorEl = document.getElementById(`${id}Error`);
+                const errorElement = document.getElementById(`${id}Error`);
                 
-                if (!input || !errorEl) return;
-                
+                if (!input || !errorElement) return;
+
                 input.addEventListener('blur', () => {
                     const error = validator(input.value.trim());
-                    showFieldError(errorEl, error);
+                    mostrarErro(errorElement, error);
                     
-                    // Adicionar feedback visual iOS
                     if (error) {
                         input.style.borderColor = 'var(--danger-color)';
                         input.style.boxShadow = '0 0 0 4px rgba(255, 59, 48, 0.1)';
@@ -851,14 +862,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         input.style.boxShadow = '0 0 0 4px rgba(52, 199, 89, 0.1)';
                     }
                 });
-                
+
                 input.addEventListener('input', () => {
-                    if (errorEl.textContent) {
+                    if (errorElement.textContent) {
                         const error = validator(input.value.trim());
-                        showFieldError(errorEl, error);
+                        mostrarErro(errorElement, error);
                     }
                 });
-                
+
                 input.addEventListener('focus', () => {
                     input.style.borderColor = 'var(--primary-color)';
                     input.style.boxShadow = '0 0 0 4px var(--primary-light)';
@@ -868,94 +879,66 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Erro ao configurar validação:', error);
         }
     }
-    
-    function showFieldError(errorEl, error) {
-        if (!errorEl) return;
+
+    function mostrarErro(element, message) {
+        if (!element) return;
         
-        errorEl.textContent = error || '';
+        element.textContent = message || '';
         
-        if (error) {
-            errorEl.style.opacity = '1';
-            errorEl.style.transform = 'translateY(0)';
+        if (message) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
         } else {
-            errorEl.style.opacity = '0';
-            errorEl.style.transform = 'translateY(-10px)';
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(-10px)';
         }
     }
-    
-    // Validadores
-    function validateNome(nome) {
+
+    function validarNome(nome) {
         if (!nome) return 'Nome é obrigatório';
         if (nome.length < 2) return 'Nome deve ter pelo menos 2 caracteres';
         if (nome.length > 100) return 'Nome deve ter no máximo 100 caracteres';
         if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(nome)) return 'Nome deve conter apenas letras e espaços';
         return '';
     }
-    
-    function validateEmail(email) {
+
+    function validarEmail(email) {
         if (!email) return 'Email é obrigatório';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) return 'Email inválido';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email inválido';
         if (email.length > 255) return 'Email muito longo';
         
-        // Verificar se email já existe (exceto na edição)
-        const existingUser = usuarios.find(u => u.email.toLowerCase() === email.toLowerCase());
-        const editingUserId = document.getElementById("editUserId")?.value;
-        if (existingUser && existingUser.id != editingUserId) {
+        const usuarioExistente = usuarios.find(u => u.email.toLowerCase() === email.toLowerCase());
+        const editUserId = document.getElementById('editUserId')?.value;
+        
+        if (usuarioExistente && usuarioExistente.id != editUserId) {
             return 'Este email já está cadastrado';
         }
         
         return '';
     }
-    
-    function validateTelefone(telefone) {
+
+    function validarTelefone(telefone) {
         if (!telefone) return 'Telefone é obrigatório';
-        const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
-        if (!phoneRegex.test(telefone)) return 'Formato inválido. Use: (11) 99999-9999';
+        if (!/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/.test(telefone)) {
+            return 'Formato inválido. Use: (11) 99999-9999';
+        }
         return '';
     }
-    
-    function validateCargo(cargo) {
+
+    function validarCargo(cargo) {
         if (!cargo) return 'Cargo é obrigatório';
         return '';
     }
-    
+
+    // Gerenciamento de usuários
     function carregarUsuarios() {
         try {
-            const stored = localStorage.getItem("usuarios");
-            if (stored) {
-                usuarios = JSON.parse(stored);
+            const dadosSalvos = localStorage.getItem('usuarios');
+            if (dadosSalvos) {
+                usuarios = JSON.parse(dadosSalvos);
             } else {
-                // Dados iniciais mais realistas
-                usuarios = [
-                    {
-                        id: 1,
-                        nome: "Ana Silva Santos",
-                        email: "ana.santos@empresa.com",
-                        telefone: "(11) 98765-4321",
-                        cargo: "Desenvolvedor",
-                        foto: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
-                        dataCadastro: new Date().toISOString()
-                    },
-                    {
-                        id: 2,
-                        nome: "Carlos Eduardo Lima",
-                        email: "carlos.lima@empresa.com",
-                        telefone: "(21) 99876-5432",
-                        cargo: "Designer",
-                        foto: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
-                        dataCadastro: new Date().toISOString()
-                    },
-                    {
-                        id: 3,
-                        nome: "Mariana Costa Oliveira",
-                        email: "mariana.oliveira@empresa.com",
-                        telefone: "(31) 97654-3210",
-                        cargo: "Gerente",
-                        foto: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop",
-                        dataCadastro: new Date().toISOString()
-                    }
-                ];
+                // Dados iniciais com 50 usuários
+                usuarios = gerarUsuariosIniciais();
                 salvarUsuarios();
             }
         } catch (error) {
@@ -963,34 +946,73 @@ document.addEventListener("DOMContentLoaded", () => {
             usuarios = [];
         }
     }
-    
+
+    function gerarUsuariosIniciais() {
+        const nomes = [
+            'Ana Silva Santos', 'Carlos Eduardo Lima', 'Mariana Costa Oliveira', 'João Pedro Almeida',
+            'Fernanda Rodrigues', 'Rafael Santos Silva', 'Juliana Pereira Costa', 'Bruno Henrique Souza',
+            'Camila Ferreira Lima', 'Diego Martins Rocha', 'Larissa Oliveira Santos', 'Thiago Alves Pereira',
+            'Gabriela Costa Ferreira', 'Lucas Henrique Silva', 'Amanda Rodrigues Lima', 'Felipe Santos Oliveira',
+            'Natália Pereira Costa', 'Rodrigo Lima Santos', 'Isabela Ferreira Alves', 'Gustavo Oliveira Silva',
+            'Priscila Santos Lima', 'Matheus Costa Pereira', 'Vanessa Rodrigues Santos', 'André Silva Oliveira',
+            'Carolina Pereira Lima', 'Daniel Santos Costa', 'Letícia Oliveira Ferreira', 'Ricardo Lima Silva',
+            'Patrícia Costa Santos', 'Marcelo Pereira Oliveira', 'Renata Silva Lima', 'Fábio Santos Costa',
+            'Tatiana Oliveira Pereira', 'Vinícius Lima Santos', 'Cristina Costa Silva', 'Eduardo Pereira Lima',
+            'Mônica Santos Oliveira', 'Alexandre Lima Costa', 'Débora Silva Pereira', 'Leandro Santos Lima',
+            'Adriana Costa Oliveira', 'Robson Pereira Santos', 'Simone Lima Silva', 'Márcio Santos Costa',
+            'Eliane Oliveira Lima', 'Sérgio Costa Santos', 'Cláudia Pereira Silva', 'Antônio Lima Oliveira',
+            'Rosana Santos Costa', 'Paulo Silva Lima', 'Márcia Oliveira Santos', 'José Costa Pereira'
+        ];
+
+        const cargos = ['Desenvolvedor', 'Designer', 'Gerente', 'Analista', 'Coordenador', 'Diretor', 'Estagiário'];
+        const fotos = [
+            'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1674752/pexels-photo-1674752.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+            'https://images.pexels.com/photos/1758144/pexels-photo-1758144.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+        ];
+
+        return nomes.map((nome, index) => ({
+            id: index + 1,
+            nome,
+            email: `${nome.toLowerCase().replace(/\s+/g, '.')}@empresa.com`,
+            telefone: `(${10 + Math.floor(Math.random() * 90)}) 9${Math.floor(Math.random() * 9000) + 1000}-${Math.floor(Math.random() * 9000) + 1000}`,
+            cargo: cargos[Math.floor(Math.random() * cargos.length)],
+            foto: fotos[Math.floor(Math.random() * fotos.length)],
+            dataCadastro: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+        }));
+    }
+
     function salvarUsuarios() {
         try {
-            localStorage.setItem("usuarios", JSON.stringify(usuarios));
-            updateStats();
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+            atualizarEstatisticas();
         } catch (error) {
             console.error('Erro ao salvar usuários:', error);
             showToast('Erro', 'Erro ao salvar dados. Verifique o espaço de armazenamento.', 'error');
         }
     }
-    
-    function updateStats() {
+
+    function atualizarEstatisticas() {
         try {
-            const today = new Date().toDateString();
-            const newToday = usuarios.filter(u => 
-                new Date(u.dataCadastro).toDateString() === today
+            const hoje = new Date().toDateString();
+            const novosHoje = usuarios.filter(u => 
+                new Date(u.dataCadastro).toDateString() === hoje
             ).length;
-            
-            // Animação de contagem para os números
-            animateNumber(totalUsersEl, usuarios.length);
-            animateNumber(newUsersTodayEl, newToday);
-            animateNumber(filteredUsersEl, filteredUsuarios.length);
+
+            animarNumero(totalUsers, usuarios.length);
+            animarNumero(newUsersToday, novosHoje);
+            animarNumero(filteredUsers, usuariosFiltrados.length);
         } catch (error) {
             console.error('Erro ao atualizar estatísticas:', error);
         }
     }
-    
-    function animateNumber(element, targetValue) {
+
+    function animarNumero(element, targetValue) {
         if (!element) return;
         
         const currentValue = parseInt(element.textContent) || 0;
@@ -1000,9 +1022,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (steps === 0) return;
         
-        const stepDuration = Math.max(duration / steps, 50);
-        
+        const stepTime = Math.max(duration / steps, 50);
         let current = currentValue;
+        
         const timer = setInterval(() => {
             current += increment;
             element.textContent = current;
@@ -1010,30 +1032,32 @@ document.addEventListener("DOMContentLoaded", () => {
             if (current === targetValue) {
                 clearInterval(timer);
             }
-        }, stepDuration);
+        }, stepTime);
     }
-    
-    function applyFiltersAndSort() {
+
+    function aplicarFiltros() {
         try {
-            let result = [...usuarios];
-            
-            // Aplicar busca
-            if (currentSearch) {
-                result = result.filter(u =>
-                    u.nome.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                    u.email.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                    u.cargo.toLowerCase().includes(currentSearch.toLowerCase())
+            let usuariosFiltradosTemp = [...usuarios];
+
+            // Filtro de busca
+            if (termoBusca) {
+                usuariosFiltradosTemp = usuariosFiltradosTemp.filter(usuario =>
+                    usuario.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+                    usuario.email.toLowerCase().includes(termoBusca.toLowerCase()) ||
+                    usuario.cargo.toLowerCase().includes(termoBusca.toLowerCase())
                 );
             }
-            
-            // Aplicar filtro de cargo
-            if (currentFilter) {
-                result = result.filter(u => u.cargo === currentFilter);
+
+            // Filtro de cargo
+            if (filtroargo) {
+                usuariosFiltradosTemp = usuariosFiltradosTemp.filter(usuario =>
+                    usuario.cargo === filtroargo
+                );
             }
-            
-            // Aplicar ordenação
-            result.sort((a, b) => {
-                switch (currentSort) {
+
+            // Ordenação
+            usuariosFiltradosTemp.sort((a, b) => {
+                switch (ordenacao) {
                     case 'nome':
                         return a.nome.localeCompare(b.nome);
                     case 'email':
@@ -1046,47 +1070,54 @@ document.addEventListener("DOMContentLoaded", () => {
                         return 0;
                 }
             });
-            
-            filteredUsuarios = result;
-            updateStats();
-            
+
+            usuariosFiltrados = usuariosFiltradosTemp;
+            atualizarEstatisticas();
+
             // Ajustar página atual se necessário
-            const totalPages = getTotalPages();
-            if (currentPage > totalPages && totalPages > 0) {
-                currentPage = totalPages;
-            } else if (currentPage < 1) {
-                currentPage = 1;
+            const totalPaginas = getTotalPaginas();
+            if (paginaAtual > totalPaginas && totalPaginas > 0) {
+                paginaAtual = totalPaginas;
+            } else if (paginaAtual < 1) {
+                paginaAtual = 1;
             }
         } catch (error) {
             console.error('Erro ao aplicar filtros:', error);
         }
     }
-    
+
     function mostrarUsuarios() {
         try {
             if (!usuariosContainer) return;
-            
-            usuariosContainer.innerHTML = "";
-            usuariosContainer.className = currentView === 'grid' ? 'usuarios-grid' : 'usuarios-list';
-            
-            if (filteredUsuarios.length === 0) {
+
+            usuariosContainer.innerHTML = '';
+            usuariosContainer.className = tipoVisualizacao === 'grid' ? 'usuarios-grid' : 'usuarios-list';
+
+            if (usuariosFiltrados.length === 0) {
                 if (emptyState) emptyState.style.display = 'block';
                 return;
             }
-            
+
             if (emptyState) emptyState.style.display = 'none';
-            
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const paginatedUsers = filteredUsuarios.slice(startIndex, startIndex + itemsPerPage);
-            
-            paginatedUsers.forEach((usuario, index) => {
-                const div = document.createElement("div");
-                div.className = `usuario-card ${currentView === 'list' ? 'list-view' : ''}`;
-                div.style.animationDelay = `${index * 0.1}s`;
-                
-                const dataFormatada = new Date(usuario.dataCadastro).toLocaleDateString('pt-BR');
-                
-                div.innerHTML = `
+
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const usuariosPagina = usuariosFiltrados.slice(inicio, inicio + itensPorPagina);
+
+            usuariosPagina.forEach((usuario, index) => {
+                const usuarioCard = document.createElement('div');
+                usuarioCard.className = `usuario-card ${tipoVisualizacao === 'list' ? 'list-view' : ''}`;
+                usuarioCard.style.animationDelay = `${index * 0.1}s`;
+                usuarioCard.dataset.userId = usuario.id;
+
+                const dataCadastro = new Date(usuario.dataCadastro).toLocaleDateString('pt-BR');
+                const isSelected = usuariosSelecionados.has(usuario.id);
+
+                usuarioCard.innerHTML = `
+                    <div class="usuario-checkbox">
+                        <input type="checkbox" id="user-${usuario.id}" ${isSelected ? 'checked' : ''} 
+                               onchange="toggleUsuarioSelecionado(${usuario.id})">
+                        <label for="user-${usuario.id}"></label>
+                    </div>
                     <img src="${usuario.foto}" alt="Foto de ${usuario.nome}" 
                          onerror="this.src='https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'"
                          loading="lazy">
@@ -1094,7 +1125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <h3>${usuario.nome}</h3>
                         <p><iconify-icon icon="mdi:email"></iconify-icon> ${usuario.email}</p>
                         <p><iconify-icon icon="mdi:phone"></iconify-icon> ${usuario.telefone}</p>
-                        <p><iconify-icon icon="mdi:calendar"></iconify-icon> Cadastrado em ${dataFormatada}</p>
+                        <p><iconify-icon icon="mdi:calendar"></iconify-icon> Cadastrado em ${dataCadastro}</p>
                         <span class="cargo">${usuario.cargo}</span>
                     </div>
                     <div class="usuario-actions">
@@ -1106,173 +1137,176 @@ document.addEventListener("DOMContentLoaded", () => {
                         </button>
                     </div>
                 `;
-                
-                usuariosContainer.appendChild(div);
+
+                if (isSelected) {
+                    usuarioCard.classList.add('selected');
+                }
+
+                usuariosContainer.appendChild(usuarioCard);
             });
-            
-            // Adicionar event listeners para os botões
+
+            // Configurar eventos dos botões
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = parseInt(e.currentTarget.dataset.userId);
-                    editUser(userId);
+                    editarUsuario(userId);
                 });
             });
-            
+
             document.querySelectorAll('.remove-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = parseInt(e.currentTarget.dataset.userId);
-                    confirmRemoveUser(userId);
+                    confirmarRemocao(userId);
                 });
             });
+
+            // Tornar função global para o checkbox
+            window.toggleUsuarioSelecionado = toggleUsuarioSelecionado;
+
         } catch (error) {
             console.error('Erro ao mostrar usuários:', error);
         }
     }
-    
-    function updatePagination() {
+
+    function atualizarPaginacao() {
         try {
-            const totalPages = getTotalPages();
-            
-            // Atualizar botões de navegação
-            if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
-            if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-            if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-            if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-            
+            const totalPaginas = getTotalPaginas();
+
+            // Atualizar estado dos botões
+            if (firstPage) firstPage.disabled = paginaAtual === 1;
+            if (prevPage) prevPage.disabled = paginaAtual === 1;
+            if (nextPage) nextPage.disabled = paginaAtual === totalPaginas || totalPaginas === 0;
+            if (lastPage) lastPage.disabled = paginaAtual === totalPaginas || totalPaginas === 0;
+
             // Atualizar números das páginas
             if (pageNumbers) {
                 pageNumbers.innerHTML = '';
-                
-                if (totalPages <= 7) {
+
+                if (totalPaginas <= 7) {
                     // Mostrar todas as páginas
-                    for (let i = 1; i <= totalPages; i++) {
-                        createPageButton(i);
+                    for (let i = 1; i <= totalPaginas; i++) {
+                        criarBotaoPagina(i);
                     }
                 } else {
-                    // Mostrar páginas com ellipsis
-                    createPageButton(1);
-                    
-                    if (currentPage > 4) {
-                        createEllipsis();
+                    // Mostrar páginas com reticências
+                    criarBotaoPagina(1);
+
+                    if (paginaAtual > 4) {
+                        criarReticencias();
                     }
-                    
-                    const start = Math.max(2, currentPage - 2);
-                    const end = Math.min(totalPages - 1, currentPage + 2);
-                    
-                    for (let i = start; i <= end; i++) {
-                        createPageButton(i);
+
+                    const inicio = Math.max(2, paginaAtual - 2);
+                    const fim = Math.min(totalPaginas - 1, paginaAtual + 2);
+
+                    for (let i = inicio; i <= fim; i++) {
+                        criarBotaoPagina(i);
                     }
-                    
-                    if (currentPage < totalPages - 3) {
-                        createEllipsis();
+
+                    if (paginaAtual < totalPaginas - 3) {
+                        criarReticencias();
                     }
-                    
-                    if (totalPages > 1) {
-                        createPageButton(totalPages);
+
+                    if (totalPaginas > 1) {
+                        criarBotaoPagina(totalPaginas);
                     }
                 }
             }
-            
+
             // Atualizar informações da página
             if (pageInfo) {
-                pageInfo.textContent = totalPages > 0 
-                    ? `Página ${currentPage} de ${totalPages}` 
-                    : 'Nenhum resultado';
+                pageInfo.textContent = totalPaginas > 0 ? 
+                    `Página ${paginaAtual} de ${totalPaginas}` : 
+                    'Nenhum resultado';
             }
         } catch (error) {
             console.error('Erro ao atualizar paginação:', error);
         }
     }
-    
-    function createPageButton(pageNum) {
+
+    function criarBotaoPagina(numeroPagina) {
         if (!pageNumbers) return;
-        
-        const btn = document.createElement('button');
-        btn.textContent = pageNum;
-        btn.className = currentPage === pageNum ? 'active' : '';
-        btn.setAttribute('aria-label', `Ir para página ${pageNum}`);
-        btn.addEventListener('click', () => goToPage(pageNum));
-        pageNumbers.appendChild(btn);
+
+        const botao = document.createElement('button');
+        botao.textContent = numeroPagina;
+        botao.className = paginaAtual === numeroPagina ? 'active' : '';
+        botao.setAttribute('aria-label', `Ir para página ${numeroPagina}`);
+        botao.addEventListener('click', () => irParaPagina(numeroPagina));
+        pageNumbers.appendChild(botao);
     }
-    
-    function createEllipsis() {
+
+    function criarReticencias() {
         if (!pageNumbers) return;
-        
-        const span = document.createElement('span');
-        span.textContent = '...';
-        span.style.padding = '8px';
-        span.style.color = 'var(--text-secondary)';
-        span.setAttribute('aria-hidden', 'true');
-        pageNumbers.appendChild(span);
+
+        const reticencias = document.createElement('span');
+        reticencias.textContent = '...';
+        reticencias.style.padding = '8px';
+        reticencias.style.color = 'var(--text-secondary)';
+        reticencias.setAttribute('aria-hidden', 'true');
+        pageNumbers.appendChild(reticencias);
     }
-    
-    function getTotalPages() {
-        return Math.ceil(filteredUsuarios.length / itemsPerPage);
+
+    function getTotalPaginas() {
+        return Math.ceil(usuariosFiltrados.length / itensPorPagina);
     }
-    
-    function goToPage(page) {
-        const totalPages = getTotalPages();
-        if (page >= 1 && page <= totalPages) {
-            currentPage = page;
+
+    function irParaPagina(pagina) {
+        const totalPaginas = getTotalPaginas();
+        if (pagina >= 1 && pagina <= totalPaginas) {
+            paginaAtual = pagina;
             mostrarUsuarios();
-            updatePagination();
+            atualizarPaginacao();
             
-            // Scroll to top on mobile
+            // Scroll para o topo em mobile
             if (window.innerWidth <= 768) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
     }
-    
+
+    // Event Handlers
     function handleFormSubmit(e) {
         e.preventDefault();
         
         try {
             const formData = {
-                nome: document.getElementById("nome")?.value.trim() || '',
-                email: document.getElementById("email")?.value.trim() || '',
-                telefone: document.getElementById("telefone")?.value.trim() || '',
-                cargo: document.getElementById("cargo")?.value || '',
+                nome: document.getElementById('nome')?.value.trim() || '',
+                email: document.getElementById('email')?.value.trim() || '',
+                telefone: document.getElementById('telefone')?.value.trim() || '',
+                cargo: document.getElementById('cargo')?.value || '',
                 foto: fotoInput?.files?.[0]
             };
-            
-            // Validar todos os campos
-            const errors = {
-                nome: validateNome(formData.nome),
-                email: validateEmail(formData.email),
-                telefone: validateTelefone(formData.telefone),
-                cargo: validateCargo(formData.cargo)
+
+            // Validar dados
+            const erros = {
+                nome: validarNome(formData.nome),
+                email: validarEmail(formData.email),
+                telefone: validarTelefone(formData.telefone),
+                cargo: validarCargo(formData.cargo)
             };
-            
+
             // Mostrar erros
-            Object.keys(errors).forEach(field => {
-                const errorEl = document.getElementById(`${field}Error`);
-                showFieldError(errorEl, errors[field]);
+            Object.keys(erros).forEach(campo => {
+                const errorElement = document.getElementById(`${campo}Error`);
+                mostrarErro(errorElement, erros[campo]);
             });
-            
-            // Se há erros, não prosseguir
-            if (Object.values(errors).some(error => error)) {
+
+            // Verificar se há erros
+            if (Object.values(erros).some(erro => erro)) {
                 showToast('Erro', 'Por favor, corrija os erros no formulário.', 'error');
                 return;
             }
-            
-            // Mostrar loading
+
+            // Processar formulário
             const submitBtn = e.target.querySelector('button[type="submit"]');
             if (submitBtn) {
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<div class="loading" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
                 submitBtn.disabled = true;
-                
-                // Processar foto
+
                 if (formData.foto) {
                     const reader = new FileReader();
                     reader.onload = function(event) {
-                        saveUser({
-                            ...formData,
-                            foto: event.target.result
-                        });
-                        
-                        // Restaurar botão
+                        salvarUsuario({ ...formData, foto: event.target.result });
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
                     };
@@ -1283,12 +1317,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
                     reader.readAsDataURL(formData.foto);
                 } else {
-                    saveUser({
-                        ...formData,
-                        foto: "https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop"
+                    salvarUsuario({ 
+                        ...formData, 
+                        foto: 'https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop' 
                     });
-                    
-                    // Restaurar botão
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 }
@@ -1298,37 +1330,34 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Erro', 'Erro ao processar formulário.', 'error');
         }
     }
-    
-    function saveUser(userData) {
+
+    function salvarUsuario(dadosUsuario) {
         try {
             const novoUsuario = {
                 id: Date.now() + Math.random(),
-                ...userData,
+                ...dadosUsuario,
                 dataCadastro: new Date().toISOString()
             };
-            
+
             usuarios.unshift(novoUsuario);
             salvarUsuarios();
-            applyFiltersAndSort();
+            aplicarFiltros();
             mostrarUsuarios();
-            updatePagination();
-            clearForm();
+            atualizarPaginacao();
+            limparFormulario();
             
             showToast('Sucesso', 'Usuário cadastrado com sucesso!', 'success');
-            
-            // Ir para a primeira página para mostrar o novo usuário
-            goToPage(1);
+            irParaPagina(1);
         } catch (error) {
             console.error('Erro ao salvar usuário:', error);
             showToast('Erro', 'Erro ao salvar usuário.', 'error');
         }
     }
-    
-    function clearForm() {
+
+    function limparFormulario() {
         try {
             userForm?.reset();
             
-            // Limpar preview da foto
             if (filePreview) {
                 filePreview.innerHTML = `
                     <iconify-icon icon="mdi:camera-plus"></iconify-icon>
@@ -1336,42 +1365,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
                 filePreview.classList.remove('has-image');
             }
-            
-            // Limpar erros
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.textContent = '';
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(-10px)';
+
+            // Limpar mensagens de erro
+            document.querySelectorAll('.error-message').forEach(element => {
+                element.textContent = '';
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-10px)';
             });
-            
-            // Resetar estilos dos campos
-            document.querySelectorAll('input, select').forEach(el => {
-                el.style.borderColor = '';
-                el.style.boxShadow = '';
+
+            // Resetar estilos dos inputs
+            document.querySelectorAll('input, select').forEach(element => {
+                element.style.borderColor = '';
+                element.style.boxShadow = '';
             });
         } catch (error) {
             console.error('Erro ao limpar formulário:', error);
         }
     }
-    
-    function handleFilePreview(e) {
+
+    function handleFileChange(e) {
         try {
             const file = e.target.files[0];
             if (!file) return;
-            
-            // Validações de arquivo
-            if (file.size > 5 * 1024 * 1024) { // 5MB
+
+            // Validar arquivo
+            if (file.size > 5 * 1024 * 1024) {
                 showToast('Erro', 'Arquivo muito grande. Máximo 5MB.', 'error');
                 e.target.value = '';
                 return;
             }
-            
+
             if (!file.type.startsWith('image/')) {
                 showToast('Erro', 'Por favor, selecione apenas imagens.', 'error');
                 e.target.value = '';
                 return;
             }
-            
+
             // Mostrar loading
             if (filePreview) {
                 filePreview.innerHTML = `
@@ -1379,21 +1408,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span>Carregando imagem...</span>
                 `;
             }
-            
+
             const reader = new FileReader();
             reader.onload = function(event) {
                 if (filePreview) {
                     filePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
                     filePreview.classList.add('has-image');
                     
-                    // Adicionar animação de sucesso
+                    // Animação de sucesso
                     filePreview.style.transform = 'scale(1.05)';
                     setTimeout(() => {
                         filePreview.style.transform = '';
                     }, 200);
                 }
             };
-            
+
             reader.onerror = function() {
                 showToast('Erro', 'Erro ao carregar a imagem. Tente novamente.', 'error');
                 if (filePreview) {
@@ -1405,115 +1434,114 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 e.target.value = '';
             };
-            
+
             reader.readAsDataURL(file);
         } catch (error) {
             console.error('Erro ao processar arquivo:', error);
             showToast('Erro', 'Erro ao processar arquivo.', 'error');
         }
     }
-    
+
     function handleSearch(e) {
         try {
-            currentSearch = e.target.value.trim();
-            if (clearSearchBtn) {
-                clearSearchBtn.classList.toggle('show', currentSearch.length > 0);
+            termoBusca = e.target.value.trim();
+            
+            if (clearSearch) {
+                clearSearch.classList.toggle('show', termoBusca.length > 0);
             }
-            currentPage = 1;
-            applyFiltersAndSort();
+            
+            paginaAtual = 1;
+            aplicarFiltros();
             mostrarUsuarios();
-            updatePagination();
+            atualizarPaginacao();
         } catch (error) {
             console.error('Erro na busca:', error);
         }
     }
-    
-    function clearSearch() {
+
+    function limparBusca() {
         try {
             if (searchInput) searchInput.value = '';
-            currentSearch = '';
-            if (clearSearchBtn) clearSearchBtn.classList.remove('show');
-            currentPage = 1;
-            applyFiltersAndSort();
-            mostrarUsuarios();
-            updatePagination();
+            termoBusca = '';
             
-            // Foco no input após limpar
+            if (clearSearch) clearSearch.classList.remove('show');
+            
+            paginaAtual = 1;
+            aplicarFiltros();
+            mostrarUsuarios();
+            atualizarPaginacao();
+            
             searchInput?.focus();
         } catch (error) {
             console.error('Erro ao limpar busca:', error);
         }
     }
-    
-    function handleFilter(e) {
+
+    function handleCargoFilter(e) {
         try {
-            currentFilter = e.target.value;
-            currentPage = 1;
-            applyFiltersAndSort();
+            filtroargo = e.target.value;
+            paginaAtual = 1;
+            aplicarFiltros();
             mostrarUsuarios();
-            updatePagination();
+            atualizarPaginacao();
         } catch (error) {
             console.error('Erro no filtro:', error);
         }
     }
-    
+
     function handleSort(e) {
         try {
-            currentSort = e.target.value;
-            applyFiltersAndSort();
+            ordenacao = e.target.value;
+            aplicarFiltros();
             mostrarUsuarios();
-            updatePagination();
+            atualizarPaginacao();
         } catch (error) {
             console.error('Erro na ordenação:', error);
         }
     }
-    
-    function setView(view) {
+
+    function alterarVisualizacao(tipo) {
         try {
-            currentView = view;
-            if (gridViewBtn) gridViewBtn.classList.toggle('active', view === 'grid');
-            if (listViewBtn) listViewBtn.classList.toggle('active', view === 'list');
-            mostrarUsuarios();
+            tipoVisualizacao = tipo;
             
-            // Salvar preferência
-            localStorage.setItem('viewPreference', view);
+            if (gridView) gridView.classList.toggle('active', tipo === 'grid');
+            if (listView) listView.classList.toggle('active', tipo === 'list');
+            
+            mostrarUsuarios();
+            localStorage.setItem('viewPreference', tipo);
         } catch (error) {
             console.error('Erro ao alterar visualização:', error);
         }
     }
-    
+
     function handleItemsPerPageChange(e) {
         try {
-            itemsPerPage = parseInt(e.target.value);
-            currentPage = 1;
+            itensPorPagina = parseInt(e.target.value);
+            paginaAtual = 1;
             mostrarUsuarios();
-            updatePagination();
-            
-            // Salvar preferência
-            localStorage.setItem('itemsPerPagePreference', itemsPerPage);
+            atualizarPaginacao();
+            localStorage.setItem('itemsPerPagePreference', itensPorPagina);
         } catch (error) {
             console.error('Erro ao alterar itens por página:', error);
         }
     }
-    
-    function confirmRemoveUser(userId) {
+
+    function confirmarRemocao(userId) {
         try {
             const usuario = usuarios.find(u => u.id === userId);
             if (!usuario) return;
-            
+
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
-            
+
             if (modalTitle) modalTitle.textContent = 'Confirmar Remoção';
             if (modalMessage) {
                 modalMessage.textContent = `Tem certeza que deseja remover "${usuario.nome}"? Esta ação não pode ser desfeita.`;
             }
-            
+
             if (confirmModal) {
                 confirmModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
-                
-                // Armazenar o ID do usuário para remoção
                 confirmModal.dataset.userId = userId;
                 confirmModal.dataset.action = 'remove';
             }
@@ -1521,31 +1549,32 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Erro ao confirmar remoção:', error);
         }
     }
-    
-    function handleConfirmAction() {
+
+    function confirmarAcao() {
         try {
             if (!confirmModal) return;
-            
+
             const action = confirmModal.dataset.action;
             const userId = parseInt(confirmModal.dataset.userId);
-            
+
             if (action === 'remove') {
                 usuarios = usuarios.filter(u => u.id !== userId);
+                usuariosSelecionados.delete(userId);
                 salvarUsuarios();
-                applyFiltersAndSort();
+                aplicarFiltros();
                 mostrarUsuarios();
-                updatePagination();
-                
+                atualizarPaginacao();
+                atualizarBotaoSelecionados();
                 showToast('Sucesso', 'Usuário removido com sucesso!', 'success');
             }
-            
-            closeConfirmModal();
+
+            fecharModalConfirmacao();
         } catch (error) {
             console.error('Erro ao executar ação:', error);
         }
     }
-    
-    function closeConfirmModal() {
+
+    function fecharModalConfirmacao() {
         try {
             if (confirmModal) {
                 confirmModal.classList.remove('show');
@@ -1557,30 +1586,29 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Erro ao fechar modal de confirmação:', error);
         }
     }
-    
-    function editUser(userId) {
+
+    function editarUsuario(userId) {
         try {
             const usuario = usuarios.find(u => u.id === userId);
             if (!usuario) return;
-            
-            // Preencher o formulário de edição
+
             const editUserId = document.getElementById('editUserId');
             const editNome = document.getElementById('editNome');
             const editEmail = document.getElementById('editEmail');
             const editTelefone = document.getElementById('editTelefone');
             const editCargo = document.getElementById('editCargo');
-            
+
             if (editUserId) editUserId.value = usuario.id;
             if (editNome) editNome.value = usuario.nome;
             if (editEmail) editEmail.value = usuario.email;
             if (editTelefone) editTelefone.value = usuario.telefone;
             if (editCargo) editCargo.value = usuario.cargo;
-            
+
             if (editModal) {
                 editModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
                 
-                // Foco no primeiro campo
+                // Focar no nome após abrir
                 setTimeout(() => {
                     editNome?.focus();
                 }, 300);
@@ -1589,63 +1617,55 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Erro ao editar usuário:', error);
         }
     }
-    
-    function handleEditSave() {
+
+    function salvarEdicao() {
         try {
             const editUserId = document.getElementById('editUserId');
             const editNome = document.getElementById('editNome');
             const editEmail = document.getElementById('editEmail');
             const editTelefone = document.getElementById('editTelefone');
             const editCargo = document.getElementById('editCargo');
-            
+
             if (!editUserId || !editNome || !editEmail || !editTelefone || !editCargo) return;
-            
+
             const userId = parseInt(editUserId.value);
-            const formData = {
+            const dadosAtualizados = {
                 nome: editNome.value.trim(),
                 email: editEmail.value.trim(),
                 telefone: editTelefone.value.trim(),
                 cargo: editCargo.value
             };
-            
-            // Validar campos
-            const errors = {
-                nome: validateNome(formData.nome),
-                email: validateEmail(formData.email),
-                telefone: validateTelefone(formData.telefone),
-                cargo: validateCargo(formData.cargo)
+
+            // Validar dados
+            const erros = {
+                nome: validarNome(dadosAtualizados.nome),
+                email: validarEmail(dadosAtualizados.email),
+                telefone: validarTelefone(dadosAtualizados.telefone),
+                cargo: validarCargo(dadosAtualizados.cargo)
             };
-            
-            if (Object.values(errors).some(error => error)) {
+
+            if (Object.values(erros).some(erro => erro)) {
                 showToast('Erro', 'Por favor, corrija os erros no formulário.', 'error');
                 return;
             }
-            
-            // Mostrar loading
+
             const saveBtn = document.getElementById('editModalSave');
             if (saveBtn) {
                 const originalText = saveBtn.innerHTML;
                 saveBtn.innerHTML = '<div class="loading" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
                 saveBtn.disabled = true;
-                
-                // Atualizar usuário
-                const userIndex = usuarios.findIndex(u => u.id === userId);
-                if (userIndex !== -1) {
-                    usuarios[userIndex] = {
-                        ...usuarios[userIndex],
-                        ...formData
-                    };
-                    
+
+                const usuarioIndex = usuarios.findIndex(u => u.id === userId);
+                if (usuarioIndex !== -1) {
+                    usuarios[usuarioIndex] = { ...usuarios[usuarioIndex], ...dadosAtualizados };
                     salvarUsuarios();
-                    applyFiltersAndSort();
+                    aplicarFiltros();
                     mostrarUsuarios();
-                    updatePagination();
-                    
+                    atualizarPaginacao();
                     showToast('Sucesso', 'Usuário atualizado com sucesso!', 'success');
-                    closeEditModal();
+                    fecharModalEdicao();
                 }
-                
-                // Restaurar botão
+
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
             }
@@ -1654,8 +1674,8 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Erro', 'Erro ao salvar alterações.', 'error');
         }
     }
-    
-    function closeEditModal() {
+
+    function fecharModalEdicao() {
         try {
             if (editModal) {
                 editModal.classList.remove('show');
@@ -1665,32 +1685,31 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Erro ao fechar modal de edição:', error);
         }
     }
-    
-    function exportData() {
+
+    function exportarDados() {
         try {
-            if (filteredUsuarios.length === 0) {
+            if (usuariosFiltrados.length === 0) {
                 showToast('Aviso', 'Não há dados para exportar.', 'warning');
                 return;
             }
-            
-            // Mostrar loading
-            if (exportBtn) {
-                const originalText = exportBtn.innerHTML;
-                exportBtn.innerHTML = '<div class="loading" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
-                exportBtn.disabled = true;
-                
+
+            if (exportData) {
+                const originalText = exportData.innerHTML;
+                exportData.innerHTML = '<div class="loading" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
+                exportData.disabled = true;
+
                 try {
                     const csvContent = [
                         ['Nome', 'Email', 'Telefone', 'Cargo', 'Data de Cadastro'],
-                        ...filteredUsuarios.map(u => [
-                            u.nome,
-                            u.email,
-                            u.telefone,
-                            u.cargo,
-                            new Date(u.dataCadastro).toLocaleDateString('pt-BR')
+                        ...usuariosFiltrados.map(usuario => [
+                            usuario.nome,
+                            usuario.email,
+                            usuario.telefone,
+                            usuario.cargo,
+                            new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')
                         ])
                     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
-                    
+
                     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                     const link = document.createElement('a');
                     const url = URL.createObjectURL(blob);
@@ -1704,14 +1723,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.body.removeChild(link);
                     
                     URL.revokeObjectURL(url);
-                    
                     showToast('Sucesso', 'Dados exportados com sucesso!', 'success');
-                } catch (error) {
+                } catch {
                     showToast('Erro', 'Erro ao exportar dados. Tente novamente.', 'error');
                 } finally {
-                    // Restaurar botão
-                    exportBtn.innerHTML = originalText;
-                    exportBtn.disabled = false;
+                    exportData.innerHTML = originalText;
+                    exportData.disabled = false;
                 }
             }
         } catch (error) {
@@ -1719,22 +1736,22 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Erro', 'Erro ao exportar dados.', 'error');
         }
     }
-    
+
     function showToast(title, message, type = 'info') {
         try {
             const toastContainer = document.getElementById('toastContainer');
             if (!toastContainer) return;
-            
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
+
             const icons = {
                 success: 'mdi:check-circle',
                 error: 'mdi:alert-circle',
                 warning: 'mdi:alert',
                 info: 'mdi:information'
             };
-            
+
             toast.innerHTML = `
                 <iconify-icon icon="${icons[type] || icons.info}"></iconify-icon>
                 <div class="toast-content">
@@ -1745,33 +1762,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     <iconify-icon icon="mdi:close"></iconify-icon>
                 </button>
             `;
-            
-            // Event listener para fechar
+
             const closeBtn = toast.querySelector('.toast-close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
-                    removeToast(toast);
+                    removerToast(toast);
                 });
             }
-            
+
             toastContainer.appendChild(toast);
-            
-            // Auto remove após 5 segundos
+
+            // Auto remover após 5 segundos
             setTimeout(() => {
-                removeToast(toast);
+                removerToast(toast);
             }, 5000);
-            
-            // Adicionar feedback háptico no iOS
+
+            // Vibração para feedback tátil
             if (navigator.vibrate) {
                 navigator.vibrate(type === 'error' ? [100, 50, 100] : 50);
             }
-            
         } catch (error) {
             console.error('Erro ao mostrar toast:', error);
         }
     }
-    
-    function removeToast(toast) {
+
+    function removerToast(toast) {
         if (toast && toast.parentNode) {
             toast.style.transform = 'translateX(100%)';
             toast.style.opacity = '0';
@@ -1782,28 +1797,79 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 300);
         }
     }
-    
-    // Carregar preferências salvas
-    function loadPreferences() {
+
+    function setupGlobalEvents() {
+        // Carregar preferências
         try {
-            const savedView = localStorage.getItem('viewPreference');
-            if (savedView) {
-                setView(savedView);
+            const viewPreference = localStorage.getItem('viewPreference');
+            if (viewPreference) {
+                alterarVisualizacao(viewPreference);
             }
-            
-            const savedItemsPerPage = localStorage.getItem('itemsPerPagePreference');
-            if (savedItemsPerPage && itemsPerPageSelect) {
-                itemsPerPage = parseInt(savedItemsPerPage);
-                itemsPerPageSelect.value = itemsPerPage;
+
+            const itemsPerPagePreference = localStorage.getItem('itemsPerPagePreference');
+            if (itemsPerPagePreference && itemsPerPageSelect) {
+                itensPorPagina = parseInt(itemsPerPagePreference);
+                itemsPerPageSelect.value = itensPorPagina;
             }
         } catch (error) {
             console.error('Erro ao carregar preferências:', error);
         }
     }
-    
-    // Adicionar classe CSS para animação de loading
-    const style = document.createElement('style');
-    style.textContent = `
+
+    // Verificar dados de importação na inicialização
+    verificarDadosImportacao();
+
+    // Adicionar estilos para seleção
+    const selectionStyles = document.createElement('style');
+    selectionStyles.textContent = `
+        .usuario-checkbox {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+        }
+        
+        .usuario-checkbox input[type="checkbox"] {
+            display: none;
+        }
+        
+        .usuario-checkbox label {
+            display: block;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--surface-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .usuario-checkbox input[type="checkbox"]:checked + label {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .usuario-checkbox input[type="checkbox"]:checked + label::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .usuario-card.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+        
+        .usuario-card {
+            position: relative;
+        }
+        
         .loading {
             border: 2px solid var(--border-color);
             border-top: 2px solid var(--primary-color);
@@ -1821,5 +1887,5 @@ document.addEventListener("DOMContentLoaded", () => {
             animation: spin 1s linear infinite;
         }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(selectionStyles);
 });
